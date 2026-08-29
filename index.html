@@ -18,11 +18,9 @@
         .header { display: flex; justify-content: center; align-items: center; padding: 15px 20px 10px; position: sticky; top: 0; z-index: 100; background: linear-gradient(180deg, rgba(5,3,1,0.98) 0%, rgba(5,3,1,0) 100%); height: 95px; }
         .logo-img-main { height: 80px; width: auto; max-width: 200px; object-fit: contain; filter: drop-shadow(0 0 15px var(--primary-glow)); user-select: none; -webkit-user-select: none; }
         
-        /* Кнопка с тремя полосками в правом верхнем углу */
         .menu-burger { position: absolute; right: 20px; top: 28px; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; z-index: 101; backdrop-filter: blur(10px); }
         .menu-burger span { width: 18px; height: 2px; background: #fff; border-radius: 2px; }
 
-        /* Выпадающее меню соцсетей */
         .social-dropdown { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(15px); padding: 20px; }
         .social-dropdown.active { display: flex; animation: scaleIn 0.2s; }
         .social-box { background: #12141a; border: 1px solid var(--glass-border); border-radius: 28px; width: 100%; max-width: 320px; padding: 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
@@ -39,6 +37,16 @@
         .screen { display: none; padding: 0 20px 40px; animation: scaleIn 0.3s ease-out; }
         .screen.active { display: block; }
         @keyframes scaleIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Виджет ближайшего матча под плашками */
+        .next-match-widget { background: linear-gradient(135deg, rgba(255,85,0,0.15) 0%, rgba(0,0,0,0.6) 100%); border: 1px solid var(--primary); border-radius: 24px; padding: 18px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
+        .next-match-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); font-weight: 800; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .next-match-teams { display: flex; justify-content: space-between; align-items: center; }
+        .nm-team { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+        .nm-logo { width: 36px; height: 36px; background: rgba(0,0,0,0.4); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid var(--glass-border); overflow: hidden; }
+        .nm-logo img { width: 100%; height: 100%; object-fit: contain; }
+        .nm-vs { font-weight: 900; color: var(--text-muted); font-size: 14px; }
+        .nm-info { margin-top: 12px; font-size: 12px; color: var(--text-muted); text-align: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; }
 
         .glass-card { background: var(--glass-bg); backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 28px; padding: 20px; margin-bottom: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); position: relative; overflow: hidden; }
         .featured-news { padding: 0; min-height: 240px; display: flex; flex-direction: column; justify-content: flex-end; background-size: cover; background-position: center; border: 1px solid var(--primary); }
@@ -117,18 +125,14 @@
 </head>
 <body>
 
-    <!-- Меню с тремя полосками в правом верхнем углу -->
     <div class="menu-burger" onclick="toggleSocialMenu()">
         <span></span><span></span><span></span>
     </div>
 
-    <!-- Модальное окно соцсетей -->
     <div class="social-dropdown" id="socialModal" onclick="if(event.target === this) toggleSocialMenu()">
         <div class="social-box">
             <div class="social-title">Наши соцсети</div>
-            <div id="socialLinksContainer">
-                <!-- Ссылки подгружаются из базы, либо стандартные заглушки -->
-            </div>
+            <div id="socialLinksContainer"></div>
             <button class="dev-trigger" onclick="askAdmin()">Для разработчика</button>
         </div>
     </div>
@@ -147,22 +151,33 @@
         <button class="tab-pill" onclick="switchTab('shop', this)">Магазин</button>
     </nav>
 
+    <!-- 1. ГЛАВНАЯ (С ВИДЖЕТОМ БЛИЖАЙШЕГО МАТЧА ПОД ПЛАШКАМИ) -->
     <div id="screen-news" class="screen active">
+        <div id="nextMatchWidgetContainer"></div>
         <div id="newsContainer"></div>
+        
         <div class="chat-section"><div class="chat-header">💬 Обсуждение</div><div class="chat-messages" id="chat-news"></div>
             <div class="chat-input-area"><input type="text" class="chat-input" id="input-news" placeholder="Написать сообщение..."><button class="chat-send" onclick="sendChat('news')">➤</button></div>
         </div>
         
         <div class="admin-controls" id="admin-news">
-            <h3 style="color:var(--primary); margin-bottom:10px;">🛠️ Добавить новость</h3>
+            <h3 style="color:var(--primary); margin-bottom:10px;">🛠️ Настройка виджета ближайшей игры</h3>
+            <input type="text" id="nmOpponent" class="admin-input" placeholder="Соперник (напр. Титан)">
+            <input type="text" id="nmDate" class="admin-input" placeholder="Дата и время (напр. 25 Окт, 19:30)">
+            <input type="text" id="nmArena" class="admin-input" placeholder="Место (напр. Домашняя арена)">
+            <input type="file" id="nmLogoFile" class="admin-input" accept="image/*">
+            <button class="admin-btn-save" onclick="saveNextMatch()">Сохранить анонс матча</button>
+
+            <h3 style="color:var(--primary); margin:30px 0 10px;">🛠️ Добавить новость</h3>
             <input type="text" id="nTitle" class="admin-input" placeholder="Заголовок">
             <textarea id="nText" class="admin-input" placeholder="Текст"></textarea>
             <input type="text" id="nVideo" class="admin-input" placeholder="Ссылка на видео (YouTube или MP4)">
             <input type="file" id="nImgFile" class="admin-input" accept="image/*">
-            <button class="admin-btn-save" onclick="saveNews()">Опубликовать</button>
+            <button class="admin-btn-save" onclick="saveNews()">Опубликовать новость</button>
         </div>
     </div>
 
+    <!-- 2. КАЛЕНДАРЬ -->
     <div id="screen-calendar" class="screen">
         <div id="calendarContainer"></div>
         <div class="chat-section"><div class="chat-header">💬 Чат матчей</div><div class="chat-messages" id="chat-calendar"></div>
@@ -179,6 +194,7 @@
         </div>
     </div>
 
+    <!-- 3. СОСТАВ -->
     <div id="screen-squad" class="screen">
         <div class="field" id="fieldContainer"><div class="line-center"></div><div class="circle-center"></div><div class="goal-area goal-top"></div><div class="goal-area goal-bottom"></div></div>
         
@@ -212,13 +228,13 @@
         </div>
     </div>
 
+    <!-- 4. МАГАЗИН И НАСТРОЙКИ ДИЗАЙНА/ФОНА -->
     <div id="screen-shop" class="screen">
         <div class="shop-grid" id="shopContainer"></div>
         <div class="chat-section" style="margin-top: 20px;"><div class="chat-header">💬 Отзывы</div><div class="chat-messages" id="chat-shop"></div>
             <div class="chat-input-area"><input type="text" class="chat-input" id="input-shop" placeholder="Спросить про мерч..."><button class="chat-send" onclick="sendChat('shop')">➤</button></div>
         </div>
 
-        <!-- Настройки соцсетей для админа -->
         <div class="admin-controls" id="admin-shop">
             <h3 style="color:var(--primary); margin-bottom:10px;">🛠️ Добавить товар</h3>
             <input type="text" id="sName" class="admin-input" placeholder="Название товара">
@@ -226,6 +242,13 @@
             <input type="text" id="sEmoji" class="admin-input" placeholder="Эмодзи">
             <input type="file" id="sImgFile" class="admin-input" accept="image/*">
             <button class="admin-btn-save" onclick="saveShop()">В магазин</button>
+
+            <h3 style="color:var(--primary); margin: 30px 0 10px;">🎨 Дизайн и праздничный фон</h3>
+            <label style="color:#aaa; font-size:12px; margin-bottom:5px; display:block;">Загрузить картинку фона:</label>
+            <input type="file" id="bgImgFile" class="admin-input" accept="image/*">
+            <button class="admin-btn-save" style="background:#555; margin-bottom:15px;" onclick="clearBgImg()">Убрать картинку фона</button>
+            <input type="color" id="primaryColorInput" class="admin-input" style="height:50px; padding:5px;">
+            <button class="admin-btn-save" onclick="saveDesignSettings()">Сохранить дизайн</button>
 
             <h3 style="color:var(--primary); margin: 30px 0 10px;">🔗 Ссылки на соцсети</h3>
             <input type="text" id="tgLinkInput" class="admin-input" placeholder="Ссылка на Telegram">
@@ -238,7 +261,7 @@
         const firebaseConfig = {
             apiKey: "AIzaSyDsxGKTwHzLPwep_7EYiHHKAxsBwbJ-uEM",
             authDomain: "phoenix-9adab.firebaseapp.com",
-            databaseURL: "https://console.firebase.google.com/project/phoenix-9adab/database/phoenix-9adab-default-rtdb/data/~2F", // <--- ЗАМЕНИТЬ НА СВОЮ ССЫЛКУ ИЗ FIREBASE
+            databaseURL: "https://console.firebase.google.com/project/phoenix-9adab/database/phoenix-9adab-default-rtdb/data/~2F", // <--- ОБЯЗАТЕЛЬНО ЗАМЕНИТЬ НА СВОЮ ССЫЛКУ ИЗ FIREBASE
             projectId: "phoenix-9adab",
             storageBucket: "phoenix-9adab.firebasestorage.app",
             messagingSenderId: "935773473607",
@@ -248,7 +271,7 @@
         const db = firebase.database();
 
         let isAdmin = false;
-        let localData = { news: {}, matches: {}, shop: {}, players: {}, chats: { news: {}, calendar: {}, squad: {}, shop: {} }, votes: {}, social: { tg: "#", max: "#" } };
+        let localData = { news: {}, matches: {}, shop: {}, players: {}, chats: { news: {}, calendar: {}, squad: {}, shop: {} }, votes: {}, social: { tg: "#", max: "#" }, nextMatch: null, design: { color: "#ff5500", bg: "" } };
         const fanNames = ["Болельщик", "Фанат", "Ультрас", "PhoenixFan"];
 
         function toggleSocialMenu() {
@@ -257,18 +280,23 @@
 
         function askAdmin() {
             toggleSocialMenu();
-            if(!isAdmin && prompt("Пароль Разработчика:") === "71633") {
-                isAdmin = true;
-                document.body.classList.add('is-admin');
-                alert("Режим Бога активирован.");
-                renderAll();
-            }
+            setTimeout(() => {
+                let pass = prompt("Пароль Разработчика:");
+                if(pass === "71633") {
+                    isAdmin = true;
+                    document.body.classList.add('is-admin');
+                    alert("Режим Бога активирован.");
+                    renderAll();
+                } else if(pass !== null) {
+                    alert("Неверный пароль!");
+                }
+            }, 100);
         }
 
-        const refs = ['news', 'matches', 'shop', 'players', 'chats', 'votes', 'social'];
+        const refs = ['news', 'matches', 'shop', 'players', 'chats', 'votes', 'social', 'nextMatch', 'design'];
         refs.forEach(refName => {
             db.ref(refName).on('value', (snapshot) => {
-                localData[refName] = snapshot.val() || (refName === 'social' ? {tg:"#", max:"#"} : {});
+                localData[refName] = snapshot.val() || (refName === 'social' ? {tg:"#", max:"#"} : (refName === 'design' ? {color:"#ff5500", bg:""} : {}));
                 renderAll();
             });
         });
@@ -281,7 +309,39 @@
         }
 
         function renderAll() {
-            // Отрисовка соцсетей в меню
+            // Дизайн и фон
+            const des = localData.design || { color: "#ff5500", bg: "" };
+            document.documentElement.style.setProperty('--primary', des.color);
+            document.getElementById('glow1').style.background = des.color + '88';
+            document.getElementById('glow2').style.background = des.color + '88';
+            if(des.bg) {
+                document.body.style.backgroundImage = `url('${des.bg}')`;
+            } else {
+                document.body.style.backgroundImage = 'none';
+            }
+            if(document.getElementById('primaryColorInput')) document.getElementById('primaryColorInput').value = des.color;
+
+            // Виджет ближайшего матча под плашками на главной
+            const nm = localData.nextMatch;
+            const nmContainer = document.getElementById('nextMatchWidgetContainer');
+            if(nm) {
+                let nmL = nm.logo ? `<img src="${nm.logo}">` : '🛡️';
+                nmContainer.innerHTML = `
+                    <div class="next-match-widget">
+                        <div class="next-match-title"><span>🔥 Ближайший матч</span><span>${nm.date}</span></div>
+                        <div class="next-match-teams">
+                            <div class="nm-team"><div class="nm-logo"><img src="1335.jpg"></div><span>Феникс</span></div>
+                            <div class="nm-vs">VS</div>
+                            <div class="nm-team"><span>${nm.opponent}</span><div class="nm-logo">${nmL}</div></div>
+                        </div>
+                        <div class="nm-info">📍 ${nm.arena || 'Арена'}</div>
+                    </div>
+                `;
+            } else {
+                nmContainer.innerHTML = '';
+            }
+
+            // Соцсети
             const soc = localData.social || { tg: "#", max: "#" };
             document.getElementById('socialLinksContainer').innerHTML = `
                 <a href="${soc.tg}" target="_blank" class="social-link">Мы в Telegram</a>
@@ -292,7 +352,8 @@
                 document.getElementById('maxLinkInput').value = soc.max !== "#" ? soc.max : "";
             }
 
-            const newsArr = Object.entries(localData.news);
+            // Новости
+            const newsArr = Object.entries(localData.news || {});
             document.getElementById('newsContainer').innerHTML = newsArr.map(([id, n]) => {
                 let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('news', '${id}')">✖</button>` : '';
                 let mediaHtml = '';
@@ -305,32 +366,34 @@
                         mediaHtml = `<video class="news-video" controls><source src="${n.video}" type="video/mp4"></video>`;
                     }
                 }
-                
                 if(!n.video && n.img) {
                     return `<div class="glass-card featured-news" style="background-image: url('${n.img}');">${delBtn}<div class="featured-overlay"><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div></div></div>`;
                 }
                 return `<div class="glass-card">${delBtn}<div class="news-date">${n.date}</div><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div>${mediaHtml}</div>`;
             }).reverse().join('');
 
-            document.getElementById('calendarContainer').innerHTML = Object.entries(localData.matches).map(([id, m]) => {
+            // Календарь
+            document.getElementById('calendarContainer').innerHTML = Object.entries(localData.matches || {}).map(([id, m]) => {
                 let lo = m.logoO ? `<img src="${m.logoO}">` : '🛡️';
                 let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('matches', '${id}')">✖</button>` : '';
                 return `<div class="glass-card">${delBtn}<div class="match-header">${m.date}</div><div class="match-row"><div class="team-block"><div class="team-logo"><img src="1335.jpg"></div></div><div class="score-block"><div class="score-pill">${m.scoreF} : ${m.scoreO}</div><div class="match-time">${m.status}</div></div><div class="team-block"><div class="team-logo">${lo}</div><div class="team-name">${m.opponent}</div></div></div></div>`;
             }).reverse().join('');
 
-            document.getElementById('shopContainer').innerHTML = Object.entries(localData.shop).map(([id, s]) => {
+            // Магазин
+            document.getElementById('shopContainer').innerHTML = Object.entries(localData.shop || {}).map(([id, s]) => {
                 let imgTag = s.img.startsWith('data:') ? `<img src="${s.img}" class="shop-img">` : `<div class="shop-img">${s.img}</div>`;
                 let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('shop', '${id}')">✖</button>` : '';
                 return `<div class="glass-card shop-item">${delBtn}${imgTag}<div class="shop-title">${s.name}</div><div class="shop-price">${s.price}</div></div>`;
             }).reverse().join('');
 
+            // Состав
             let field = document.getElementById('fieldContainer');
             let bench = document.getElementById('benchContainer');
             field.querySelectorAll('.player-card').forEach(c => c.remove());
             bench.innerHTML = '';
             
             let voteSelectHtml = "";
-            Object.entries(localData.players).forEach(([id, p]) => {
+            Object.entries(localData.players || {}).forEach(([id, p]) => {
                 let rating = p.baseRating;
                 if(localData.votes && localData.votes[id]) {
                     let sum = rating; let count = 1;
@@ -354,6 +417,7 @@
             });
             document.getElementById('vote-player').innerHTML = voteSelectHtml;
 
+            // Чаты
             ['news', 'calendar', 'squad', 'shop'].forEach(room => {
                 const container = document.getElementById(`chat-${room}`);
                 if (!container || !localData.chats[room]) return;
@@ -406,12 +470,26 @@
             });
         }
 
+        async function saveNextMatch() {
+            let opp = document.getElementById('nmOpponent').value;
+            if(!opp) return;
+            let logoData = await processFilePromise('nmLogoFile');
+            db.ref('nextMatch').set({
+                opponent: opp,
+                date: document.getElementById('nmDate').value,
+                arena: document.getElementById('nmArena').value,
+                logo: logoData
+            });
+            document.querySelectorAll('#admin-news input').forEach(i => { if(i.id.startsWith('nm')) i.value = ''; });
+            alert("Анонс матча обновлен!");
+        }
+
         async function saveNews() {
             let title = document.getElementById('nTitle').value;
             if(!title) return;
             let imgData = await processFilePromise('nImgFile');
             db.ref('news').push({ date: "Только что", title: title, text: document.getElementById('nText').value, video: document.getElementById('nVideo').value, img: imgData });
-            document.querySelectorAll('#admin-news input, #admin-news textarea').forEach(i => i.value = '');
+            document.querySelectorAll('#admin-news input, #admin-news textarea').forEach(i => { if(!i.id.startsWith('nm')) i.value = ''; });
         }
 
         async function saveMatch() {
@@ -452,6 +530,23 @@
             let max = document.getElementById('maxLinkInput').value.trim() || "#";
             db.ref('social').set({ tg: tg, max: max });
             alert("Ссылки на соцсети сохранены!");
+        }
+
+        async function saveDesignSettings() {
+            let color = document.getElementById('primaryColorInput').value;
+            let bgData = await processFilePromise('bgImgFile');
+            let currentBg = localData.design ? localData.design.bg : "";
+            db.ref('design').set({
+                color: color,
+                bg: bgData || currentBg
+            });
+            alert("Настройки дизайна сохранены!");
+        }
+
+        function clearBgImg() {
+            let color = document.getElementById('primaryColorInput').value;
+            db.ref('design').set({ color: color, bg: "" });
+            alert("Фоновая картинка удалена!");
         }
     </script>
 </body>
