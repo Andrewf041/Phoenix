@@ -18,6 +18,19 @@
         .header { display: flex; justify-content: center; align-items: center; padding: 15px 20px 10px; position: sticky; top: 0; z-index: 100; background: linear-gradient(180deg, rgba(5,3,1,0.98) 0%, rgba(5,3,1,0) 100%); height: 95px; }
         .logo-img-main { height: 80px; width: auto; max-width: 200px; object-fit: contain; filter: drop-shadow(0 0 15px var(--primary-glow)); user-select: none; -webkit-user-select: none; }
         
+        /* Кнопка с тремя полосками в правом верхнем углу */
+        .menu-burger { position: absolute; right: 20px; top: 28px; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; z-index: 101; backdrop-filter: blur(10px); }
+        .menu-burger span { width: 18px; height: 2px; background: #fff; border-radius: 2px; }
+
+        /* Выпадающее меню соцсетей */
+        .social-dropdown { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(15px); padding: 20px; }
+        .social-dropdown.active { display: flex; animation: scaleIn 0.2s; }
+        .social-box { background: #12141a; border: 1px solid var(--glass-border); border-radius: 28px; width: 100%; max-width: 320px; padding: 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .social-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; color: #fff; }
+        .social-link { display: block; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #fff; text-decoration: none; padding: 14px; border-radius: 16px; font-weight: 700; margin-bottom: 12px; transition: 0.2s; }
+        .social-link:active { background: var(--primary); }
+        .dev-trigger { margin-top: 25px; font-size: 12px; color: var(--text-muted); cursor: pointer; text-decoration: underline; background: none; border: none; }
+
         .top-nav { display: flex; gap: 12px; overflow-x: auto; padding: 10px 20px 20px; scrollbar-width: none; z-index: 99; position: relative; }
         .top-nav::-webkit-scrollbar { display: none; }
         .tab-pill { background: var(--glass-bg); color: var(--text-muted); border: 1px solid var(--glass-border); padding: 10px 22px; border-radius: 30px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: 0.3s; backdrop-filter: blur(10px); }
@@ -104,15 +117,27 @@
 </head>
 <body>
 
-    <!-- Секретная зона для входа администратора -->
-    <div onclick="askAdmin()" style="position: fixed; top: 0; right: 0; width: 60px; height: 80px; z-index: 9999; cursor: pointer;"></div>
+    <!-- Меню с тремя полосками в правом верхнем углу -->
+    <div class="menu-burger" onclick="toggleSocialMenu()">
+        <span></span><span></span><span></span>
+    </div>
+
+    <!-- Модальное окно соцсетей -->
+    <div class="social-dropdown" id="socialModal" onclick="if(event.target === this) toggleSocialMenu()">
+        <div class="social-box">
+            <div class="social-title">Наши соцсети</div>
+            <div id="socialLinksContainer">
+                <!-- Ссылки подгружаются из базы, либо стандартные заглушки -->
+            </div>
+            <button class="dev-trigger" onclick="askAdmin()">Для разработчика</button>
+        </div>
+    </div>
 
     <div class="ambient-glow glow-1" id="glow1"></div>
     <div class="ambient-glow glow-2" id="glow2"></div>
 
     <header class="header">
         <img id="mainLogoElement" src="1335.jpg" alt="ФЕНИКС" class="logo-img-main" onerror="this.src='https://ui-avatars.com/api/?name=PH&background=ff5500&color=fff'">
-        <div id="fallbackLogo" class="fallback-logo" style="display:none;">🦅 ФЕНИКС</div>
     </header>
 
     <nav class="top-nav">
@@ -193,6 +218,7 @@
             <div class="chat-input-area"><input type="text" class="chat-input" id="input-shop" placeholder="Спросить про мерч..."><button class="chat-send" onclick="sendChat('shop')">➤</button></div>
         </div>
 
+        <!-- Настройки соцсетей для админа -->
         <div class="admin-controls" id="admin-shop">
             <h3 style="color:var(--primary); margin-bottom:10px;">🛠️ Добавить товар</h3>
             <input type="text" id="sName" class="admin-input" placeholder="Название товара">
@@ -200,6 +226,11 @@
             <input type="text" id="sEmoji" class="admin-input" placeholder="Эмодзи">
             <input type="file" id="sImgFile" class="admin-input" accept="image/*">
             <button class="admin-btn-save" onclick="saveShop()">В магазин</button>
+
+            <h3 style="color:var(--primary); margin: 30px 0 10px;">🔗 Ссылки на соцсети</h3>
+            <input type="text" id="tgLinkInput" class="admin-input" placeholder="Ссылка на Telegram">
+            <input type="text" id="maxLinkInput" class="admin-input" placeholder="Ссылка на MAX">
+            <button class="admin-btn-save" onclick="saveSocialLinks()">Сохранить соцсети</button>
         </div>
     </div>
 
@@ -207,7 +238,7 @@
         const firebaseConfig = {
             apiKey: "AIzaSyDsxGKTwHzLPwep_7EYiHHKAxsBwbJ-uEM",
             authDomain: "phoenix-9adab.firebaseapp.com",
-            databaseURL: "https://console.firebase.google.com/project/phoenix-9adab/database/phoenix-9adab-default-rtdb/data/~2F",
+            databaseURL: "https://console.firebase.google.com/project/phoenix-9adab/database/phoenix-9adab-default-rtdb/data/~2F", // <--- ЗАМЕНИТЬ НА СВОЮ ССЫЛКУ ИЗ FIREBASE
             projectId: "phoenix-9adab",
             storageBucket: "phoenix-9adab.firebasestorage.app",
             messagingSenderId: "935773473607",
@@ -217,10 +248,15 @@
         const db = firebase.database();
 
         let isAdmin = false;
-        let localData = { news: {}, matches: {}, shop: {}, players: {}, chats: { news: {}, calendar: {}, squad: {}, shop: {} }, votes: {} };
+        let localData = { news: {}, matches: {}, shop: {}, players: {}, chats: { news: {}, calendar: {}, squad: {}, shop: {} }, votes: {}, social: { tg: "#", max: "#" } };
         const fanNames = ["Болельщик", "Фанат", "Ультрас", "PhoenixFan"];
 
+        function toggleSocialMenu() {
+            document.getElementById('socialModal').classList.toggle('active');
+        }
+
         function askAdmin() {
+            toggleSocialMenu();
             if(!isAdmin && prompt("Пароль Разработчика:") === "71633") {
                 isAdmin = true;
                 document.body.classList.add('is-admin');
@@ -229,10 +265,10 @@
             }
         }
 
-        const refs = ['news', 'matches', 'shop', 'players', 'chats', 'votes'];
+        const refs = ['news', 'matches', 'shop', 'players', 'chats', 'votes', 'social'];
         refs.forEach(refName => {
             db.ref(refName).on('value', (snapshot) => {
-                localData[refName] = snapshot.val() || {};
+                localData[refName] = snapshot.val() || (refName === 'social' ? {tg:"#", max:"#"} : {});
                 renderAll();
             });
         });
@@ -245,6 +281,17 @@
         }
 
         function renderAll() {
+            // Отрисовка соцсетей в меню
+            const soc = localData.social || { tg: "#", max: "#" };
+            document.getElementById('socialLinksContainer').innerHTML = `
+                <a href="${soc.tg}" target="_blank" class="social-link">Мы в Telegram</a>
+                <a href="${soc.max}" target="_blank" class="social-link">Мы в MAX</a>
+            `;
+            if(document.getElementById('tgLinkInput')) {
+                document.getElementById('tgLinkInput').value = soc.tg !== "#" ? soc.tg : "";
+                document.getElementById('maxLinkInput').value = soc.max !== "#" ? soc.max : "";
+            }
+
             const newsArr = Object.entries(localData.news);
             document.getElementById('newsContainer').innerHTML = newsArr.map(([id, n]) => {
                 let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('news', '${id}')">✖</button>` : '';
@@ -398,6 +445,13 @@
             let imgData = await processFilePromise('sImgFile');
             db.ref('shop').push({ name: document.getElementById('sName').value, price: document.getElementById('sPrice').value, img: imgData || document.getElementById('sEmoji').value || "📦" });
             document.querySelectorAll('#admin-shop input').forEach(i => i.value = '');
+        }
+
+        function saveSocialLinks() {
+            let tg = document.getElementById('tgLinkInput').value.trim() || "#";
+            let max = document.getElementById('maxLinkInput').value.trim() || "#";
+            db.ref('social').set({ tg: tg, max: max });
+            alert("Ссылки на соцсети сохранены!");
         }
     </script>
 </body>
