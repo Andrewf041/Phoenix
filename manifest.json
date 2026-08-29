@@ -1,0 +1,15 @@
+{
+  "name": "ФК Феникс",
+  "short_name": "Феникс",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#050301",
+  "theme_color": "#ff5500",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
