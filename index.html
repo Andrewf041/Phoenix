@@ -19,7 +19,7 @@
         .logo-img-main { height: 80px; width: auto; max-width: 200px; object-fit: contain; filter: drop-shadow(0 0 15px var(--primary-glow)); user-select: none; -webkit-user-select: none; }
         
         .menu-burger { position: absolute; right: 20px; top: 28px; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; z-index: 101; backdrop-filter: blur(10px); }
-        .menu-burger span { width: 18px; height: 2px; background: #fff; border-radius: 2px; }
+        .menu-burger span { width: 18px; height: 2px; background: #fff; border-radius: 2px; pointer-events: none; }
 
         .social-dropdown { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(15px); padding: 20px; }
         .social-dropdown.active { display: flex; animation: scaleIn 0.2s; }
@@ -49,11 +49,24 @@
 
         .glass-card { background: var(--glass-bg); backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 28px; padding: 20px; margin-bottom: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); position: relative; overflow: hidden; }
         .featured-news { padding: 0; min-height: 240px; display: flex; flex-direction: column; justify-content: flex-end; background-size: cover; background-position: center; border: 1px solid var(--primary); }
-        .featured-overlay { background: linear-gradient(0deg, #000 0%, transparent 100%); padding: 25px 20px; border-radius: 0 0 28px 28px; }
+        .featured-overlay { background: linear-gradient(0deg, #000 0%, transparent 100%); padding: 25px 20px; border-radius: 0 0 28px 28px; width: 100%; }
         .news-date { font-size: 11px; color: var(--primary); font-weight: 800; text-transform: uppercase; margin-bottom: 6px; }
         .news-title { font-size: 20px; font-weight: 800; line-height: 1.2; margin-bottom: 8px; }
         .news-text { font-size: 14px; color: #ccc; line-height: 1.4; margin-bottom: 10px; }
         .news-video { width: 100%; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--glass-border); }
+
+        /* Лайки и комменты в новостях */
+        .news-actions { display: flex; gap: 10px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; }
+        .na-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #fff; padding: 6px 14px; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; }
+        .news-comments-section { margin-top: 12px; background: rgba(0,0,0,0.3); border-radius: 16px; padding: 12px; }
+        .nc-list { max-height: 180px; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .news-comment { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 12px; font-size: 13px; position: relative; }
+        .nc-name { font-size: 10px; color: var(--primary); font-weight: 700; margin-bottom: 3px; }
+        .nc-del { position: absolute; right: 8px; top: 8px; color: red; cursor: pointer; font-size: 12px; display: none; }
+        .is-admin .nc-del { display: block; }
+        .nc-input-row { display: flex; gap: 8px; }
+        .nc-input { flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); border-radius: 12px; padding: 8px 12px; color: #fff; font-size: 13px; outline: none; }
+        .nc-send { background: var(--primary); border: none; width: 32px; height: 32px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; }
 
         .match-header { font-size: 12px; color: var(--primary); text-align: center; margin-bottom: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .match-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -119,8 +132,6 @@
         .admin-input { width: 100%; padding: 16px; background: #08090b; color: #fff; border: 1px solid #2a2d35; border-radius: 16px; margin-bottom: 15px; font-size: 14px; }
         .input-row { display: flex; gap: 10px; }
         input[type="file"] { padding: 12px; background: #08090b; color: #888; font-size: 12px; }
-        
-        /* Исправленная кнопка входа, работающая на всех телефонах */
         .admin-btn-save { background: var(--primary); color: #fff; border: none; padding: 18px; border-radius: 16px; font-weight: 800; width: 100%; cursor: pointer; text-align: center; display: block; }
     </style>
 </head>
@@ -135,17 +146,17 @@
         <div class="social-box">
             <div class="social-title">Наши соцсети</div>
             <div id="socialLinksContainer"></div>
-            <button class="dev-trigger" onclick="openPasswordModal()">Для разработчика</button>
+            <button type="button" class="dev-trigger" onclick="openPasswordModal()">Для разработчика</button>
         </div>
     </div>
 
-    <!-- Надежное модальное окно входа с кнопкой вместо стандартного prompt -->
+    <!-- Надежное окно ввода пароля с кнопками button -->
     <div class="social-dropdown" id="passwordModal" onclick="if(event.target === this) closePasswordModal()">
         <div class="social-box">
             <div class="social-title">🔒 Вход для разработчика</div>
             <input type="password" id="devPassInput" class="admin-input" placeholder="Пароль" style="text-align: center;">
-            <div class="admin-btn-save" onclick="checkDevPassword()">Войти</div>
-            <button class="dev-trigger" onclick="closePasswordModal()" style="margin-top:15px;">Отмена</button>
+            <button type="button" class="admin-btn-save" onclick="checkDevPassword()">Войти</button>
+            <button type="button" class="dev-trigger" onclick="closePasswordModal()" style="margin-top:15px; width:100%;">Отмена</button>
         </div>
     </div>
 
@@ -157,20 +168,16 @@
     </header>
 
     <nav class="top-nav">
-        <button class="tab-pill active" onclick="switchTab('news', this)">Главная</button>
-        <button class="tab-pill" onclick="switchTab('calendar', this)">Календарь</button>
-        <button class="tab-pill" onclick="switchTab('squad', this)">Состав</button>
-        <button class="tab-pill" onclick="switchTab('shop', this)">Магазин</button>
+        <button type="button" class="tab-pill active" onclick="switchTab('news', this)">Главная</button>
+        <button type="button" class="tab-pill" onclick="switchTab('calendar', this)">Календарь</button>
+        <button type="button" class="tab-pill" onclick="switchTab('squad', this)">Состав</button>
+        <button type="button" class="tab-pill" onclick="switchTab('shop', this)">Магазин</button>
     </nav>
 
-    <!-- 1. ГЛАВНАЯ -->
+    <!-- 1. ГЛАВНАЯ (ЧАТ УДАЛЕН, ЛАЙКИ И КОММЕНТЫ В КАРТОЧКАХ) -->
     <div id="screen-news" class="screen active">
         <div id="nextMatchWidgetContainer"></div>
         <div id="newsContainer"></div>
-        
-        <div class="chat-section"><div class="chat-header">💬 Обсуждение</div><div class="chat-messages" id="chat-news"></div>
-            <div class="chat-input-area"><input type="text" class="chat-input" id="input-news" placeholder="Написать сообщение..."><button class="chat-send" onclick="sendChat('news')">➤</button></div>
-        </div>
         
         <div class="admin-controls" id="admin-news">
             <h3 style="color:var(--primary); margin-bottom:10px;">🛠️ Настройка виджета ближайшей игры</h3>
@@ -178,23 +185,23 @@
             <input type="date" id="nmDateRaw" class="admin-input">
             <input type="text" id="nmArena" class="admin-input" placeholder="Место (напр. Домашняя арена)">
             <input type="file" id="nmLogoFile" class="admin-input" accept="image/*">
-            <div class="admin-btn-save" onclick="saveNextMatch()">Сохранить анонс матча</div>
+            <button type="button" class="admin-btn-save" onclick="saveNextMatch()">Сохранить анонс матча</button>
 
             <h3 style="color:var(--primary); margin:30px 0 10px;">🛠️ Добавить новость</h3>
             <input type="text" id="nTitle" class="admin-input" placeholder="Заголовок">
             <textarea id="nText" class="admin-input" placeholder="Текст"></textarea>
             <input type="text" id="nVideo" class="admin-input" placeholder="Ссылка на видео (YouTube или MP4)">
             <input type="file" id="nImgFile" class="admin-input" accept="image/*">
-            <div class="admin-btn-save" onclick="saveNews()">Опубликовать новость</div>
+            <button type="button" class="admin-btn-save" onclick="saveNews()">Опубликовать новость</button>
         </div>
     </div>
 
-    <!-- 2. КАЛЕНДАРЬ (УМНЫЙ С СОРТИРОВКОЙ ПО ДАТАМ) -->
+    <!-- 2. КАЛЕНДАРЬ -->
     <div id="screen-calendar" class="screen">
         <div id="calendarContainer"></div>
         
         <div class="chat-section"><div class="chat-header">💬 Чат матчей</div><div class="chat-messages" id="chat-calendar"></div>
-            <div class="chat-input-area"><input type="text" class="chat-input" id="input-calendar" placeholder="Написать сообщение..."><button class="chat-send" onclick="sendChat('calendar')">➤</button></div>
+            <div class="chat-input-area"><input type="text" class="chat-input" id="input-calendar" placeholder="Написать сообщение..."><button type="button" class="chat-send" onclick="sendChat('calendar')">➤</button></div>
         </div>
 
         <div class="admin-controls" id="admin-calendar">
@@ -211,7 +218,7 @@
                 <input type="number" id="mScoreO" class="admin-input" placeholder="Счет Они (если матч)">
             </div>
             <input type="file" id="mLogoOFile" class="admin-input" accept="image/*">
-            <div class="admin-btn-save" onclick="saveMatch()">Добавить в календарь</div>
+            <button type="button" class="admin-btn-save" onclick="saveMatch()">Добавить в календарь</button>
         </div>
     </div>
 
@@ -225,11 +232,11 @@
         <div class="chat-section" style="margin-bottom: 20px; margin-top: 20px;">
             <div class="chat-header">⭐ Фанатское голосование</div>
             <div class="vote-row"><select id="vote-player" class="vote-select"></select><input type="number" id="vote-score" class="vote-input" placeholder="0-99"></div>
-            <button class="vote-btn" onclick="submitVote()">Проголосовать</button>
+            <button type="button" class="vote-btn" onclick="submitVote()">Проголосовать</button>
         </div>
 
         <div class="chat-section"><div class="chat-header">💬 Обсуждение состава</div><div class="chat-messages" id="chat-squad"></div>
-            <div class="chat-input-area"><input type="text" class="chat-input" id="input-squad" placeholder="Кто должен играть?"><button class="chat-send" onclick="sendChat('squad')">➤</button></div>
+            <div class="chat-input-area"><input type="text" class="chat-input" id="input-squad" placeholder="Кто должен играть?"><button type="button" class="chat-send" onclick="sendChat('squad')">➤</button></div>
         </div>
 
         <div class="admin-controls" id="admin-squad">
@@ -245,7 +252,7 @@
             </div>
             <input type="text" id="pCustomPos" class="admin-input" placeholder="Позиция (напр. ЗАП ЦН)" style="display:none; margin-top:15px;">
             <input type="file" id="pPhotoFile" class="admin-input" accept="image/*" style="margin-top:15px;">
-            <div class="admin-btn-save" onclick="savePlayer()">Сохранить игрока</div>
+            <button type="button" class="admin-btn-save" onclick="savePlayer()">Сохранить игрока</button>
         </div>
     </div>
 
@@ -253,7 +260,7 @@
     <div id="screen-shop" class="screen">
         <div class="shop-grid" id="shopContainer"></div>
         <div class="chat-section" style="margin-top: 20px;"><div class="chat-header">💬 Отзывы</div><div class="chat-messages" id="chat-shop"></div>
-            <div class="chat-input-area"><input type="text" class="chat-input" id="input-shop" placeholder="Спросить про мерч..."><button class="chat-send" onclick="sendChat('shop')">➤</button></div>
+            <div class="chat-input-area"><input type="text" class="chat-input" id="input-shop" placeholder="Спросить про мерч..."><button type="button" class="chat-send" onclick="sendChat('shop')">➤</button></div>
         </div>
 
         <div class="admin-controls" id="admin-shop">
@@ -262,23 +269,24 @@
             <input type="text" id="sPrice" class="admin-input" placeholder="Цена">
             <input type="text" id="sEmoji" class="admin-input" placeholder="Эмодзи">
             <input type="file" id="sImgFile" class="admin-input" accept="image/*">
-            <div class="admin-btn-save" onclick="saveShop()">В магазин</div>
+            <button type="button" class="admin-btn-save" onclick="saveShop()">В магазин</button>
 
             <h3 style="color:var(--primary); margin: 30px 0 10px;">🎨 Дизайн и праздничный фон</h3>
             <label style="color:#aaa; font-size:12px; margin-bottom:5px; display:block;">Загрузить картинку фона:</label>
             <input type="file" id="bgImgFile" class="admin-input" accept="image/*">
-            <div class="admin-btn-save" style="background:#555; margin-bottom:15px;" onclick="clearBgImg()">Убрать картинку фона</div>
+            <button type="button" class="admin-btn-save" style="background:#555; margin-bottom:15px;" onclick="clearBgImg()">Убрать картинку фона</button>
             <input type="color" id="primaryColorInput" class="admin-input" style="height:50px; padding:5px;">
-            <div class="admin-btn-save" onclick="saveDesignSettings()">Сохранить дизайн</div>
+            <button type="button" class="admin-btn-save" onclick="saveDesignSettings()">Сохранить дизайн</button>
 
             <h3 style="color:var(--primary); margin: 30px 0 10px;">🔗 Ссылки на соцсети</h3>
             <input type="text" id="tgLinkInput" class="admin-input" placeholder="Ссылка на Telegram">
             <input type="text" id="maxLinkInput" class="admin-input" placeholder="Ссылка на MAX">
-            <div class="admin-btn-save" onclick="saveSocialLinks()">Сохранить соцсети</div>
+            <button type="button" class="admin-btn-save" onclick="saveSocialLinks()">Сохранить соцсети</button>
         </div>
     </div>
 
     <script>
+        // === ВСТАВЬ ТВОЮ ССЫЛКУ ВОТ СЮДА В СТРОКУ databaseURL ===
         const firebaseConfig = {
             apiKey: "AIzaSyDsxGKTwHzLPwep_7EYiHHKAxsBwbJ-uEM",
             authDomain: "phoenix-9adab.firebaseapp.com",
@@ -292,22 +300,19 @@
         const db = firebase.database();
 
         let isAdmin = false;
-        let localData = { news: {}, matches: {}, shop: {}, players: {}, chats: { news: {}, calendar: {}, squad: {}, shop: {} }, votes: {}, social: { tg: "#", max: "#" }, nextMatch: null, design: { color: "#ff5500", bg: "" } };
-        const fanNames = ["Болельщик", "Фанат", "Ультрас", "PhoenixFan"];
+        let localData = { news: {}, matches: {}, shop: {}, players: {}, chats: { calendar: {}, squad: {}, shop: {} }, votes: {}, social: { tg: "#", max: "#" }, nextMatch: null, design: { color: "#ff5500", bg: "" } };
+        const fanNames = ["Болельщик", "Фанат", "Ультрас", "PhoenixFan", "Игрок"];
+        let openNewsComments = {}; // Для хранения открытых вкладок с комментариями
 
-        function toggleSocialMenu() {
-            document.getElementById('socialModal').classList.toggle('active');
-        }
+        function toggleSocialMenu() { document.getElementById('socialModal').classList.toggle('active'); }
 
         function openPasswordModal() {
-            toggleSocialMenu();
+            document.getElementById('socialModal').classList.remove('active');
             document.getElementById('passwordModal').classList.add('active');
             document.getElementById('devPassInput').value = '';
         }
 
-        function closePasswordModal() {
-            document.getElementById('passwordModal').classList.remove('active');
-        }
+        function closePasswordModal() { document.getElementById('passwordModal').classList.remove('active'); }
 
         function checkDevPassword() {
             let pass = document.getElementById('devPassInput').value.trim();
@@ -342,7 +347,28 @@
             let parts = dateStr.split('-');
             if(parts.length !== 3) return dateStr;
             let months = ["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"];
-            return `${parseInt(parts[2场] || parts[2])} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
+            return `${parseInt(parts[2])} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
+        }
+
+        // Функции для лайков и комментов новостей
+        function likeNews(id) {
+            let current = (localData.news[id] && localData.news[id].likes) ? localData.news[id].likes : 0;
+            db.ref('news/' + id + '/likes').set(current + 1);
+        }
+        function toggleNewsComments(id) {
+            openNewsComments[id] = !openNewsComments[id];
+            renderAll();
+        }
+        function sendNewsComment(id) {
+            let input = document.getElementById('nc-input-' + id);
+            if(input && input.value.trim()) {
+                db.ref('news/' + id + '/comments').push({
+                    name: fanNames[Math.floor(Math.random() * fanNames.length)] + Math.floor(Math.random() * 99),
+                    text: input.value.trim()
+                });
+                input.value = '';
+                openNewsComments[id] = true;
+            }
         }
 
         function renderAll() {
@@ -350,11 +376,7 @@
             document.documentElement.style.setProperty('--primary', des.color);
             document.getElementById('glow1').style.background = des.color + '88';
             document.getElementById('glow2').style.background = des.color + '88';
-            if(des.bg) {
-                document.body.style.backgroundImage = `url('${des.bg}')`;
-            } else {
-                document.body.style.backgroundImage = 'none';
-            }
+            document.body.style.backgroundImage = des.bg ? `url('${des.bg}')` : 'none';
             if(document.getElementById('primaryColorInput')) document.getElementById('primaryColorInput').value = des.color;
 
             const nm = localData.nextMatch;
@@ -372,23 +394,19 @@
                         <div class="nm-info">📍 ${nm.arena || 'Арена'}</div>
                     </div>
                 `;
-            } else {
-                nmContainer.innerHTML = '';
-            }
+            } else { nmContainer.innerHTML = ''; }
 
             const soc = localData.social || { tg: "#", max: "#" };
             document.getElementById('socialLinksContainer').innerHTML = `
                 <a href="${soc.tg}" target="_blank" class="social-link">Мы в Telegram</a>
                 <a href="${soc.max}" target="_blank" class="social-link">Мы в MAX</a>
             `;
-            if(document.getElementById('tgLinkInput')) {
-                document.getElementById('tgLinkInput').value = soc.tg !== "#" ? soc.tg : "";
-                document.getElementById('maxLinkInput').value = soc.max !== "#" ? soc.max : "";
-            }
+            if(document.getElementById('tgLinkInput')) { document.getElementById('tgLinkInput').value = soc.tg !== "#" ? soc.tg : ""; document.getElementById('maxLinkInput').value = soc.max !== "#" ? soc.max : ""; }
 
+            // Отрисовка Новостей с лайками и комментами
             const newsArr = Object.entries(localData.news || {});
             document.getElementById('newsContainer').innerHTML = newsArr.map(([id, n]) => {
-                let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('news', '${id}')">✖</button>` : '';
+                let delBtn = isAdmin ? `<button type="button" class="delete-btn" onclick="deleteItem('news', '${id}')">✖</button>` : '';
                 let mediaHtml = '';
                 if(n.video) {
                     if(n.video.includes('youtube.com') || n.video.includes('youtu.be')) {
@@ -399,59 +417,59 @@
                         mediaHtml = `<video class="news-video" controls><source src="${n.video}" type="video/mp4"></video>`;
                     }
                 }
+                
+                let likes = n.likes || 0;
+                let commentsObj = n.comments || {};
+                let commentsCount = Object.keys(commentsObj).length;
+                let commentsHtml = Object.entries(commentsObj).map(([cId, c]) => `
+                    <div class="news-comment">
+                        <div class="nc-name">${c.name}</div>
+                        <div class="nc-text">${c.text}</div>
+                        ${isAdmin ? `<span class="nc-del" onclick="deleteItem('news/${id}/comments', '${cId}')">✖</span>` : ''}
+                    </div>
+                `).join('');
+
+                let interactionPanel = `
+                    <div class="news-actions">
+                        <button type="button" class="na-btn" onclick="likeNews('${id}')">❤️ ${likes}</button>
+                        <button type="button" class="na-btn" onclick="toggleNewsComments('${id}')">💬 ${commentsCount}</button>
+                    </div>
+                    <div class="news-comments-section" style="display: ${openNewsComments[id] ? 'block' : 'none'};">
+                        <div class="nc-list">${commentsHtml}</div>
+                        <div class="nc-input-row">
+                            <input type="text" id="nc-input-${id}" placeholder="Ваш комментарий..." class="nc-input">
+                            <button type="button" class="nc-send" onclick="sendNewsComment('${id}')">➤</button>
+                        </div>
+                    </div>
+                `;
+
                 if(!n.video && n.img) {
-                    return `<div class="glass-card featured-news" style="background-image: url('${n.img}');">${delBtn}<div class="featured-overlay"><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div></div></div>`;
+                    return `<div class="glass-card featured-news" style="background-image: url('${n.img}');">${delBtn}<div class="featured-overlay"><div class="news-date">${n.date}</div><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div>${interactionPanel}</div></div>`;
                 }
-                return `<div class="glass-card">${delBtn}<div class="news-date">${n.date}</div><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div>${mediaHtml}</div>`;
+                return `<div class="glass-card">${delBtn}<div class="news-date">${n.date}</div><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div>${mediaHtml}${interactionPanel}</div>`;
             }).reverse().join('');
 
-            // УМНЫЙ КАЛЕНДАРЬ С СОРТИРОВКОЙ ПО ДАТАМ
+            // Отрисовка Умного Календаря
             let matchesArr = Object.entries(localData.matches || {});
             matchesArr.sort((a, b) => new Date(a[1].date || '1970-01-01') - new Date(b[1].date || '1970-01-01'));
-
             document.getElementById('calendarContainer').innerHTML = matchesArr.map(([id, m]) => {
-                let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('matches', '${id}')">✖</button>` : '';
+                let delBtn = isAdmin ? `<button type="button" class="delete-btn" onclick="deleteItem('matches', '${id}')">✖</button>` : '';
                 let formattedDate = formatDateReadable(m.date);
 
                 if(m.type === 'BD') {
-                    return `
-                        <div class="glass-card" style="border-color: #ffd700; background: linear-gradient(135deg, rgba(255,215,0,0.1) 0%, rgba(0,0,0,0.6) 100%);">
-                            ${delBtn}
-                            <div class="match-header" style="color: #ffd700;">🎂 День Рождения • ${formattedDate}</div>
-                            <div style="text-align: center; font-size: 18px; font-weight: 800; padding: 10px 0;">🎉 ${m.opponent} 🎉</div>
-                        </div>
-                    `;
+                    return `<div class="glass-card" style="border-color: #ffd700; background: linear-gradient(135deg, rgba(255,215,0,0.1) 0%, rgba(0,0,0,0.6) 100%);">${delBtn}<div class="match-header" style="color: #ffd700;">🎂 День Рождения • ${formattedDate}</div><div style="text-align: center; font-size: 18px; font-weight: 800; padding: 10px 0;">🎉 ${m.opponent} 🎉</div></div>`;
                 } else if(m.type === 'event') {
-                    return `
-                        <div class="glass-card" style="border-color: #00ffff;">
-                            ${delBtn}
-                            <div class="match-header" style="color: #00ffff;">📌 Событие • ${formattedDate}</div>
-                            <div style="text-align: center; font-size: 18px; font-weight: 800; padding: 10px 0;">${m.opponent}</div>
-                        </div>
-                    `;
+                    return `<div class="glass-card" style="border-color: #00ffff;">${delBtn}<div class="match-header" style="color: #00ffff;">📌 Событие • ${formattedDate}</div><div style="text-align: center; font-size: 18px; font-weight: 800; padding: 10px 0;">${m.opponent}</div></div>`;
                 } else {
                     let lo = m.logoO ? `<img src="${m.logoO}">` : '🛡️';
                     let statusText = (m.scoreF !== "-" && m.scoreF !== undefined && m.scoreF !== "") ? "Завершен" : "Ожидается";
-                    return `
-                        <div class="glass-card">
-                            ${delBtn}
-                            <div class="match-header">🏒 Матч • ${formattedDate}</div>
-                            <div class="match-row">
-                                <div class="team-block"><div class="team-logo"><img src="1335.jpg"></div><div class="team-name">Феникс</div></div>
-                                <div class="score-block">
-                                    <div class="score-pill">${m.scoreF} : ${m.scoreO}</div>
-                                    <div class="match-time">${statusText}</div>
-                                </div>
-                                <div class="team-block"><div class="team-logo">${lo}</div><div class="team-name">${m.opponent}</div></div>
-                            </div>
-                        </div>
-                    `;
+                    return `<div class="glass-card">${delBtn}<div class="match-header">🏒 Матч • ${formattedDate}</div><div class="match-row"><div class="team-block"><div class="team-logo"><img src="1335.jpg"></div><div class="team-name">Феникс</div></div><div class="score-block"><div class="score-pill">${m.scoreF} : ${m.scoreO}</div><div class="match-time">${statusText}</div></div><div class="team-block"><div class="team-logo">${lo}</div><div class="team-name">${m.opponent}</div></div></div></div>`;
                 }
             }).join('');
 
             document.getElementById('shopContainer').innerHTML = Object.entries(localData.shop || {}).map(([id, s]) => {
                 let imgTag = s.img.startsWith('data:') ? `<img src="${s.img}" class="shop-img">` : `<div class="shop-img">${s.img}</div>`;
-                let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('shop', '${id}')">✖</button>` : '';
+                let delBtn = isAdmin ? `<button type="button" class="delete-btn" onclick="deleteItem('shop', '${id}')">✖</button>` : '';
                 return `<div class="glass-card shop-item">${delBtn}${imgTag}<div class="shop-title">${s.name}</div><div class="shop-price">${s.price}</div></div>`;
             }).reverse().join('');
 
@@ -470,8 +488,7 @@
                 }
 
                 let bg = p.photo ? `url('${p.photo}')` : `url('https://ui-avatars.com/api/?name=${p.name}&background=111&color=fff')`;
-                let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('players', '${id}')">✖</button>` : '';
-                
+                let delBtn = isAdmin ? `<button type="button" class="delete-btn" onclick="deleteItem('players', '${id}')">✖</button>` : '';
                 let cardHtml = `${delBtn}<div class="card-rating">${rating}</div><div class="card-pos">${p.posName}</div><div class="card-photo" style="background-image: ${bg}"></div><div class="card-name">${p.name}</div>`;
                 
                 if (id.startsWith('pos-')) {
@@ -485,11 +502,11 @@
             });
             document.getElementById('vote-player').innerHTML = voteSelectHtml;
 
-            ['news', 'calendar', 'squad', 'shop'].forEach(room => {
+            ['calendar', 'squad', 'shop'].forEach(room => {
                 const container = document.getElementById(`chat-${room}`);
                 if (!container || !localData.chats[room]) return;
                 container.innerHTML = Object.entries(localData.chats[room]).map(([id, msg]) => {
-                    let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('chats/${room}', '${id}')">✖</button>` : '';
+                    let delBtn = isAdmin ? `<button type="button" class="delete-btn" onclick="deleteItem('chats/${room}', '${id}')">✖</button>` : '';
                     return `<div class="msg"><div class="msg-avatar">${msg.name.charAt(0)}</div><div class="msg-content">${delBtn}<div class="msg-name">${msg.name}</div><div class="msg-text">${msg.text}</div></div></div>`;
                 }).join('');
                 container.scrollTop = container.scrollHeight;
@@ -541,12 +558,7 @@
             let opp = document.getElementById('nmOpponent').value;
             if(!opp) return;
             let logoData = await processFilePromise('nmLogoFile');
-            db.ref('nextMatch').set({
-                opponent: opp,
-                date: document.getElementById('nmDateRaw').value,
-                arena: document.getElementById('nmArena').value,
-                logo: logoData
-            });
+            db.ref('nextMatch').set({ opponent: opp, date: document.getElementById('nmDateRaw').value, arena: document.getElementById('nmArena').value, logo: logoData });
             document.querySelectorAll('#admin-news input').forEach(i => { if(i.id.startsWith('nm')) i.value = ''; });
             alert("Анонс матча обновлен!");
         }
@@ -555,23 +567,16 @@
             let title = document.getElementById('nTitle').value;
             if(!title) return;
             let imgData = await processFilePromise('nImgFile');
-            db.ref('news').push({ date: new Date().toLocaleDateString(), title: title, text: document.getElementById('nText').value, video: document.getElementById('nVideo').value, img: imgData });
-            document.querySelectorAll('#admin-news input, #admin-news textarea').forEach(i => { if(!i.id.startsWith('nm')) i.value = ''; });
+            db.ref('news').push({ date: new Date().toLocaleDateString(), title: title, text: document.getElementById('nText').value, video: document.getElementById('nVideo').value, img: imgData, likes: 0 });
+            document.querySelectorAll('#admin-news input[type="text"], #admin-news textarea, #admin-news input[type="file"]').forEach(i => { if(!i.id.startsWith('nm')) i.value = ''; });
         }
 
         async function saveMatch() {
             let imgData = await processFilePromise('mLogoOFile');
             let type = document.getElementById('mType').value;
             let sf = document.getElementById('mScoreF').value, so = document.getElementById('mScoreO').value;
-            db.ref('matches').push({
-                type: type,
-                opponent: document.getElementById('mOpponent').value,
-                date: document.getElementById('mDateRaw').value,
-                scoreF: sf || "-",
-                scoreO: so || "-",
-                logoO: imgData
-            });
-            document.querySelectorAll('#admin-calendar input').forEach(i => i.value = '');
+            db.ref('matches').push({ type: type, opponent: document.getElementById('mOpponent').value, date: document.getElementById('mDateRaw').value, scoreF: sf || "-", scoreO: so || "-", logoO: imgData });
+            document.querySelectorAll('#admin-calendar input[type="text"], #admin-calendar input[type="date"], #admin-calendar input[type="number"], #admin-calendar input[type="file"]').forEach(i => i.value = '');
             alert("Событие добавлено в календарь!");
         }
 
@@ -579,29 +584,22 @@
             let n = document.getElementById('pName').value, r = document.getElementById('pRating').value, pos = document.getElementById('pPos').value;
             let customPos = document.getElementById('pCustomPos').value;
             let posNames = {"pos-c":"ЦН", "pos-lw":"ЛН", "pos-rw":"ПН", "pos-ld":"ЛЗ", "pos-rd":"ПЗ", "pos-gk":"ВР"};
-            
             let imgData = await processFilePromise('pPhotoFile');
             let photo = imgData;
             if(pos !== 'bench' && !photo && localData.players[pos]) photo = localData.players[pos].photo;
-            
             let playerData = { name: n, baseRating: parseInt(r), posName: (pos === 'bench' && customPos) ? customPos : posNames[pos], photo: photo || "" };
-            
-            if (pos === 'bench') { db.ref('players').push(playerData); } 
-            else { db.ref(`players/${pos}`).set(playerData); }
-            
+            if (pos === 'bench') { db.ref('players').push(playerData); } else { db.ref(`players/${pos}`).set(playerData); }
             document.querySelectorAll('#admin-squad input').forEach(i => i.value = '');
         }
 
         async function saveShop() {
             let imgData = await processFilePromise('sImgFile');
             db.ref('shop').push({ name: document.getElementById('sName').value, price: document.getElementById('sPrice').value, img: imgData || document.getElementById('sEmoji').value || "📦" });
-            document.querySelectorAll('#admin-shop input').forEach(i => i.value = '');
+            document.querySelectorAll('#admin-shop input[type="text"], #admin-shop input[type="file"]').forEach(i => i.value = '');
         }
 
         function saveSocialLinks() {
-            let tg = document.getElementById('tgLinkInput').value.trim() || "#";
-            let max = document.getElementById('maxLinkInput').value.trim() || "#";
-            db.ref('social').set({ tg: tg, max: max });
+            db.ref('social').set({ tg: document.getElementById('tgLinkInput').value.trim() || "#", max: document.getElementById('maxLinkInput').value.trim() || "#" });
             alert("Ссылки на соцсети сохранены!");
         }
 
@@ -609,16 +607,12 @@
             let color = document.getElementById('primaryColorInput').value;
             let bgData = await processFilePromise('bgImgFile');
             let currentBg = localData.design ? localData.design.bg : "";
-            db.ref('design').set({
-                color: color,
-                bg: bgData || currentBg
-            });
+            db.ref('design').set({ color: color, bg: bgData || currentBg });
             alert("Настройки дизайна сохранены!");
         }
 
         function clearBgImg() {
-            let color = document.getElementById('primaryColorInput').value;
-            db.ref('design').set({ color: color, bg: "" });
+            db.ref('design').set({ color: document.getElementById('primaryColorInput').value, bg: "" });
             alert("Фоновая картинка удалена!");
         }
     </script>
