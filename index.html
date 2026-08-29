@@ -16,7 +16,7 @@
         .glow-1 { top: -100px; left: -100px; } .glow-2 { bottom: 10%; right: -150px; opacity: 0.2; }
 
         .header { display: flex; justify-content: center; align-items: center; padding: 15px 20px 10px; position: sticky; top: 0; z-index: 100; background: linear-gradient(180deg, rgba(5,3,1,0.98) 0%, rgba(5,3,1,0) 100%); height: 95px; }
-        .logo-img-main { height: 80px; width: auto; max-width: 200px; object-fit: contain; filter: drop-shadow(0 0 15px var(--primary-glow)); user-select: none; -webkit-user-select: none; }
+        .logo-img-main { height: 80px; width: auto; max-width: 200px; object-fit: contain; filter: drop-shadow(0 0 15px var(--primary-glow)); user-select: none; -webkit-user-select: none; cursor: pointer; }
         
         .top-nav { display: flex; gap: 12px; overflow-x: auto; padding: 10px 20px 20px; scrollbar-width: none; z-index: 99; position: relative; }
         .top-nav::-webkit-scrollbar { display: none; }
@@ -110,6 +110,7 @@
 
     <header class="header">
         <img id="mainLogoElement" src="1335.jpg" alt="ФЕНИКС" class="logo-img-main" onerror="this.src='https://ui-avatars.com/api/?name=PH&background=ff5500&color=fff'">
+        <div id="fallbackLogo" class="fallback-logo" style="display:none; cursor:pointer;">🦅 ФЕНИКС</div>
     </header>
 
     <nav class="top-nav">
@@ -205,7 +206,7 @@
         const firebaseConfig = {
             apiKey: "AIzaSyDsxGKTwHzLPwep_7EYiHHKAxsBwbJ-uEM",
             authDomain: "phoenix-9adab.firebaseapp.com",
-            databaseURL: "ТВОЯ_СКОПИРОВАННАЯ_ССЫЛКА", // <--- ОБЯЗАТЕЛЬНО ЗАМЕНИТЬ
+            databaseURL: "https://console.firebase.google.com/project/phoenix-9adab/database/phoenix-9adab-default-rtdb/data/~2F", // <--- ОБЯЗАТЕЛЬНО ЗАМЕНИТЬ
             projectId: "phoenix-9adab",
             storageBucket: "phoenix-9adab.firebasestorage.app",
             messagingSenderId: "935773473607",
@@ -218,15 +219,26 @@
         let localData = { news: {}, matches: {}, shop: {}, players: {}, chats: { news: {}, calendar: {}, squad: {}, shop: {} }, votes: {} };
         const fanNames = ["Болельщик", "Фанат", "Ультрас", "PhoenixFan"];
 
-        let pressTimer;
-        const logo = document.getElementById('mainLogoElement');
-        logo.addEventListener('touchstart', () => { pressTimer = setTimeout(askAdmin, 2500); });
-        logo.addEventListener('touchend', () => { clearTimeout(pressTimer); });
-        logo.addEventListener('mousedown', () => { pressTimer = setTimeout(askAdmin, 2500); });
-        logo.addEventListener('mouseup', () => { clearTimeout(pressTimer); });
+        // === НОВЫЙ ВХОД ДЛЯ АДМИНА: 3 БЫСТРЫХ НАЖАТИЯ ===
+        let adminClickCount = 0;
+        let adminClickTimer;
+
+        function handleAdminTap() {
+            adminClickCount++;
+            clearTimeout(adminClickTimer);
+            if(adminClickCount >= 3) {
+                adminClickCount = 0;
+                askAdmin();
+            } else {
+                adminClickTimer = setTimeout(() => { adminClickCount = 0; }, 1000);
+            }
+        }
+
+        document.getElementById('mainLogoElement').addEventListener('click', handleAdminTap);
+        document.getElementById('fallbackLogo').addEventListener('click', handleAdminTap);
 
         function askAdmin() {
-            if(prompt("Пароль Разработчика:") === "1234") {
+            if(!isAdmin && prompt("Пароль Разработчика:") === "1234") {
                 isAdmin = true;
                 document.body.classList.add('is-admin');
                 alert("Режим Бога активирован.");
