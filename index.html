@@ -13,6 +13,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
     <style>
         :root { --primary: #ff5500; --primary-glow: rgba(255, 85, 0, 0.6); --bg-dark: #050301; --glass-bg: rgba(255, 255, 255, 0.03); --glass-border: rgba(255, 255, 255, 0.08); --text-main: #ffffff; --text-muted: #a0a0a0; }
@@ -140,10 +141,256 @@
         input[type="file"] { padding: 12px; background: #08090b; color: #888; font-size: 12px; }
         .admin-btn-save { background: var(--primary); color: #fff; border: none; padding: 18px; border-radius: 16px; font-weight: 800; width: 100%; cursor: pointer; text-align: center; display: block; }
     </style>
+
+    <!-- ===== НОВЫЕ СТИЛИ (ДОБАВЛЕНО) ===== -->
+    <style>
+        /* Колокольчик уведомлений */
+        .notif-bell { position: absolute; left: 20px; top: 30px; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 101; backdrop-filter: blur(10px); font-size: 18px; }
+        .notif-badge { position: absolute; top: -4px; right: -4px; background: #ff0040; color: #fff; font-size: 10px; font-weight: 900; min-width: 18px; height: 18px; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+        .notif-panel { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(15px); padding: 20px; }
+        .notif-panel.active { display: flex; animation: scaleIn 0.2s; }
+        .notif-list { max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .notif-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; font-size: 13px; border-left: 3px solid var(--primary); }
+        .notif-item-date { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+
+        /* Поиск */
+        .search-container { padding: 0 20px 10px; }
+        .search-box { display: flex; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); border-radius: 30px; padding: 4px; }
+        .search-input { flex: 1; background: transparent; border: none; color: #fff; padding: 10px 16px; font-size: 14px; outline: none; }
+        .search-clear { background: none; border: none; color: var(--text-muted); font-size: 18px; padding: 0 12px; cursor: pointer; }
+        .search-highlight { background: rgba(255,85,0,0.3); border-radius: 4px; padding: 0 2px; }
+
+        /* Статистика */
+        .stats-table-wrap { overflow-x: auto; }
+        .stats-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .stats-tbl th { color: var(--primary); font-size: 11px; text-transform: uppercase; padding: 8px 6px; text-align: left; border-bottom: 1px solid var(--glass-border); white-space: nowrap; }
+        .stats-tbl td { padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,0.03); white-space: nowrap; }
+        .stats-tbl tr:hover td { background: rgba(255,255,255,0.03); }
+        .stats-rank { color: var(--primary); font-weight: 900; }
+        .standing-pos { display: inline-block; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-weight: 900; font-size: 12px; }
+        .standing-pos.gold { background: #ffd700; color: #000; }
+        .standing-pos.silver { background: #c0c0c0; color: #000; }
+        .standing-pos.bronze { background: #cd7f32; color: #fff; }
+
+        /* Галерея */
+        .gallery-albums { display: flex; flex-direction: column; gap: 20px; }
+        .gallery-album-title { font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .gallery-thumb { aspect-ratio: 1; border-radius: 12px; object-fit: cover; cursor: pointer; border: 1px solid var(--glass-border); transition: 0.2s; width: 100%; }
+        .gallery-thumb:active { opacity: 0.7; }
+        .lightbox-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 3000; align-items: center; justify-content: center; flex-direction: column; }
+        .lightbox-overlay.active { display: flex; }
+        .lightbox-img { max-width: 95vw; max-height: 80vh; border-radius: 12px; object-fit: contain; }
+        .lightbox-caption { color: #ccc; font-size: 14px; margin-top: 12px; text-align: center; }
+        .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; font-size: 22px; cursor: pointer; }
+        .lightbox-nav { position: absolute; top: 50%; background: rgba(255,255,255,0.1); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; cursor: pointer; transform: translateY(-50%); }
+        .lightbox-prev { left: 10px; }
+        .lightbox-next { right: 10px; }
+
+        /* Live */
+        .live-board { background: linear-gradient(135deg, rgba(255,85,0,0.1), rgba(0,0,0,0.8)); border: 2px solid var(--primary); border-radius: 28px; padding: 24px; text-align: center; margin-bottom: 20px; position: relative; box-shadow: 0 0 40px rgba(255,85,0,0.15); }
+        .live-badge { display: inline-block; background: #ff0040; color: #fff; font-size: 11px; font-weight: 900; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; animation: livePulse 1.5s infinite; }
+        @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .live-teams { display: flex; justify-content: space-around; align-items: center; margin: 15px 0; }
+        .live-team-name { font-size: 16px; font-weight: 800; }
+        .live-score-big { font-size: 52px; font-weight: 900; text-shadow: 0 0 30px var(--primary-glow); letter-spacing: 8px; }
+        .live-period { font-size: 14px; color: var(--text-muted); margin: 8px 0; }
+        .live-timer-display { font-size: 36px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--primary); }
+        .live-no-match { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 16px; }
+        .live-events-list { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; }
+        .live-event { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255,255,255,0.03); border-radius: 14px; font-size: 13px; border-left: 3px solid var(--primary); }
+        .live-event-icon { font-size: 20px; flex-shrink: 0; }
+        .live-event-time { color: var(--primary); font-weight: 700; font-size: 12px; flex-shrink: 0; }
+        .live-admin-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        .live-admin-row .admin-btn-save { width: auto; padding: 12px 18px; font-size: 13px; flex: 1; }
+
+        /* Расписание */
+        .sched-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; }
+        .sched-day-badge { background: var(--primary); color: #fff; font-weight: 900; font-size: 12px; padding: 8px 12px; border-radius: 14px; text-align: center; min-width: 50px; text-transform: uppercase; }
+        .sched-info { flex: 1; }
+        .sched-time { font-size: 18px; font-weight: 900; }
+        .sched-place { font-size: 13px; color: var(--text-muted); }
+        .sched-type { font-size: 11px; color: var(--primary); font-weight: 700; text-transform: uppercase; }
+        .sched-note { font-size: 12px; color: #aaa; margin-top: 2px; }
+
+        /* Прогнозы */
+        .pred-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 24px; padding: 18px; margin-bottom: 16px; position: relative; }
+        .pred-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+        .pred-date { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+        .pred-input-row { display: flex; gap: 10px; align-items: center; justify-content: center; margin: 12px 0; }
+        .pred-score-input { width: 60px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); border-radius: 12px; padding: 10px; text-align: center; color: #fff; font-size: 18px; font-weight: 900; }
+        .pred-vs { font-weight: 900; color: var(--text-muted); }
+        .pred-status { font-size: 12px; color: var(--primary); font-weight: 700; text-align: center; margin-top: 8px; }
+        .pred-results { margin-top: 12px; font-size: 13px; }
+        .pred-result-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .pred-winner { color: #4caf50; font-weight: 700; }
+        .pred-closed-label { background: rgba(255,0,64,0.2); color: #ff4081; font-size: 11px; padding: 4px 10px; border-radius: 10px; font-weight: 700; }
+
+        /* Профиль игрока */
+        .profile-content { text-align: center; }
+        .profile-photo { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 16px; background-size: cover; background-position: center; border: 3px solid var(--primary); box-shadow: 0 0 30px var(--primary-glow); }
+        .profile-name { font-size: 24px; font-weight: 900; margin-bottom: 4px; }
+        .profile-pos { font-size: 14px; color: var(--primary); font-weight: 700; margin-bottom: 16px; }
+        .profile-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+        .profile-stat { background: rgba(0,0,0,0.4); border-radius: 16px; padding: 12px 8px; }
+        .profile-stat-val { font-size: 24px; font-weight: 900; color: var(--primary); }
+        .profile-stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+        .profile-bio { font-size: 14px; color: #ccc; line-height: 1.4; text-align: left; margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 16px; }
+
+        /* Достижения */
+        .achieve-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .achieve-item { text-align: center; padding: 16px 8px; background: rgba(0,0,0,0.3); border-radius: 20px; border: 1px solid var(--glass-border); }
+        .achieve-item.unlocked { border-color: var(--primary); background: rgba(255,85,0,0.08); }
+        .achieve-icon { font-size: 36px; margin-bottom: 6px; }
+        .achieve-item:not(.unlocked) .achieve-icon { filter: grayscale(1) opacity(0.3); }
+        .achieve-name { font-size: 12px; font-weight: 700; color: #eee; }
+        .achieve-desc { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+        .achieve-progress { margin-top: 6px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .achieve-progress-bar { height: 100%; background: var(--primary); border-radius: 2px; transition: width 0.3s; }
+        .achieve-trigger { position: fixed; bottom: 90px; left: 20px; width: 48px; height: 48px; border-radius: 50%; background: rgba(0,0,0,0.7); border: 1px solid var(--glass-border); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; z-index: 999; }
+
+        /* AI Chat Widget */
+        .ai-fab { position: fixed; bottom: 25px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #cc4400); border: none; color: #fff; font-size: 26px; cursor: pointer; z-index: 999; box-shadow: 0 4px 20px var(--primary-glow); display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+        .ai-fab:active { transform: scale(0.9); }
+        .ai-panel { display: none; position: fixed; bottom: 90px; right: 15px; width: calc(100% - 30px); max-width: 380px; height: 450px; background: #0d0e12; border: 1px solid var(--glass-border); border-radius: 28px; z-index: 2001; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+        .ai-panel.active { display: flex; animation: scaleIn 0.2s; }
+        .ai-panel-header { padding: 16px 20px; background: rgba(255,85,0,0.1); border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; }
+        .ai-panel-title { font-weight: 800; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+        .ai-panel-close { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+        .ai-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .ai-msg { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.4; white-space: pre-wrap; }
+        .ai-msg.user { background: var(--primary); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .ai-msg.bot { background: rgba(255,255,255,0.06); color: #eee; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .ai-msg.bot.typing { color: var(--text-muted); font-style: italic; }
+        .ai-input-area { padding: 10px; border-top: 1px solid var(--glass-border); display: flex; gap: 8px; }
+        .ai-input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); border-radius: 20px; padding: 10px 16px; color: #fff; font-size: 14px; outline: none; }
+        .ai-send { background: var(--primary); border: none; width: 40px; height: 40px; border-radius: 50%; color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .ai-admin-btn { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; border: none; padding: 14px; border-radius: 16px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 10px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .ai-admin-btn:disabled { opacity: 0.5; cursor: wait; }
+
+        /* Язык */
+        .lang-toggle { display: flex; gap: 6px; margin-top: 15px; justify-content: center; }
+        .lang-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #fff; padding: 8px 18px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 14px; }
+        .lang-btn.active { background: var(--primary); border-color: var(--primary); }
+
+        /* Шеринг */
+        .share-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #fff; padding: 6px 14px; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; }
+
+        /* ===== ЭКРАН ВХОДА ===== */
+        .auth-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; background: var(--bg-dark); display: flex; align-items: center; justify-content: center; transition: opacity 0.5s, visibility 0.5s; }
+        .auth-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .auth-container { width: 100%; max-width: 380px; padding: 30px 24px; text-align: center; animation: authFadeIn 0.6s ease-out; }
+        @keyframes authFadeIn { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .auth-logo { width: 120px; height: 120px; margin: 0 auto 20px; border-radius: 50%; object-fit: contain; filter: drop-shadow(0 0 40px var(--primary-glow)); animation: authLogoPulse 3s ease-in-out infinite; }
+        @keyframes authLogoPulse { 0%,100% { filter: drop-shadow(0 0 25px var(--primary-glow)); } 50% { filter: drop-shadow(0 0 50px var(--primary-glow)); } }
+        .auth-welcome { font-size: 28px; font-weight: 900; margin-bottom: 6px; background: linear-gradient(135deg, #fff 0%, var(--primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .auth-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; line-height: 1.4; }
+        .auth-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+        .auth-divider-line { flex: 1; height: 1px; background: var(--glass-border); }
+        .auth-divider-text { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+        .auth-btn { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 16px 20px; border-radius: 16px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; margin-bottom: 12px; transition: transform 0.15s, box-shadow 0.2s; position: relative; overflow: hidden; }
+        .auth-btn:active { transform: scale(0.97); }
+        .auth-btn svg, .auth-btn img { width: 22px; height: 22px; flex-shrink: 0; }
+
+        .auth-btn-google { background: #ffffff; color: #3c4043; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+        .auth-btn-google:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+
+        .auth-btn-apple { background: #000000; color: #ffffff; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+        .auth-btn-apple:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+
+        .auth-btn-yandex { background: #fc3f1d; color: #ffffff; box-shadow: 0 2px 12px rgba(252,63,29,0.3); }
+        .auth-btn-yandex:hover { box-shadow: 0 4px 20px rgba(252,63,29,0.5); }
+
+        .auth-btn-email { background: rgba(255,255,255,0.06); color: #fff; border: 1px solid var(--glass-border); }
+        .auth-btn-email:hover { background: rgba(255,255,255,0.1); }
+
+        .auth-guest { margin-top: 8px; background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; text-decoration: underline; padding: 12px; font-weight: 600; }
+        .auth-guest:hover { color: #fff; }
+
+        .auth-terms { font-size: 11px; color: var(--text-muted); margin-top: 20px; line-height: 1.4; }
+
+        /* Форма email-входа */
+        .auth-email-form { display: none; animation: scaleIn 0.2s; }
+        .auth-email-form.active { display: block; }
+        .auth-email-input { width: 100%; padding: 16px 20px; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); border-radius: 16px; color: #fff; font-size: 15px; outline: none; margin-bottom: 12px; transition: border-color 0.2s; }
+        .auth-email-input:focus { border-color: var(--primary); }
+        .auth-email-input::placeholder { color: rgba(255,255,255,0.3); }
+        .auth-submit { width: 100%; padding: 16px; background: var(--primary); color: #fff; border: none; border-radius: 16px; font-size: 16px; font-weight: 800; cursor: pointer; }
+        .auth-submit:disabled { opacity: 0.5; cursor: wait; }
+        .auth-back-link { background: none; border: none; color: var(--text-muted); font-size: 13px; cursor: pointer; margin-top: 12px; text-decoration: underline; }
+        .auth-error { color: #ff4444; font-size: 13px; margin-bottom: 10px; display: none; }
+        .auth-toggle-mode { background: none; border: none; color: var(--primary); font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+
+        /* Профиль в шапке */
+        .user-pill { position: absolute; left: 20px; top: 30px; display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 30px; padding: 4px 14px 4px 4px; backdrop-filter: blur(10px); z-index: 101; cursor: pointer; max-width: 160px; }
+        .user-pill-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #aa3300); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #fff; overflow: hidden; flex-shrink: 0; }
+        .user-pill-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-pill-name { font-size: 12px; font-weight: 700; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .auth-glow-1 { position: fixed; top: -150px; left: -150px; width: 400px; height: 400px; background: var(--primary); filter: blur(140px); border-radius: 50%; opacity: 0.2; pointer-events: none; }
+        .auth-glow-2 { position: fixed; bottom: -100px; right: -100px; width: 300px; height: 300px; background: var(--primary); filter: blur(120px); border-radius: 50%; opacity: 0.15; pointer-events: none; }
+    </style>
 </head>
 <body>
 
-    <div class="top-bar">
+    <!-- ===== ЭКРАН ВХОДА ===== -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-glow-1"></div>
+        <div class="auth-glow-2"></div>
+        <div class="auth-container">
+            <img id="authLogo" src="1335.jpg" alt="ФЕНИКС" class="auth-logo" onerror="this.src='https://ui-avatars.com/api/?name=PH&background=ff5500&color=fff&size=120'">
+            <div class="auth-welcome">Добро пожаловать</div>
+            <div class="auth-subtitle">ПХК Феникс — Флорбол</div>
+
+            <!-- Кнопки провайдеров -->
+            <div id="authButtons">
+                <button type="button" class="auth-btn auth-btn-google" onclick="authSignInGoogle()">
+                    <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    Войти через Google
+                </button>
+
+                <button type="button" class="auth-btn auth-btn-apple" onclick="authSignInApple()">
+                    <svg viewBox="0 0 24 24" fill="#fff"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+                    Войти через Apple
+                </button>
+
+                <button type="button" class="auth-btn auth-btn-yandex" onclick="authShowEmailForm('yandex')">
+                    <svg viewBox="0 0 24 24" fill="#fff"><path d="M13.62 21.79h-2.49V12.4L7.3 3.21h2.72l2.49 6.07h.07l2.49-6.07h2.72l-3.84 9.19v9.39z"/></svg>
+                    Войти через Яндекс
+                </button>
+
+                <div class="auth-divider">
+                    <div class="auth-divider-line"></div>
+                    <span class="auth-divider-text">или по email</span>
+                    <div class="auth-divider-line"></div>
+                </div>
+
+                <button type="button" class="auth-btn auth-btn-email" onclick="authShowEmailForm('email')">
+                    ✉️ Войти по Email
+                </button>
+
+                <button type="button" class="auth-guest" onclick="authGuestLogin()">
+                    Продолжить без входа
+                </button>
+            </div>
+
+            <!-- Форма email/пароль -->
+            <div class="auth-email-form" id="authEmailForm">
+                <div id="authFormTitle" style="font-size:18px; font-weight:800; margin-bottom:16px; color:#fff;"></div>
+                <div class="auth-error" id="authError"></div>
+                <input type="email" class="auth-email-input" id="authEmailInput" placeholder="Email" autocomplete="email">
+                <input type="password" class="auth-email-input" id="authPassInput" placeholder="Пароль (мин. 6 символов)" autocomplete="current-password">
+                <input type="text" class="auth-email-input" id="authNameInput" placeholder="Ваше имя" autocomplete="name" style="display:none;">
+                <button type="button" class="auth-submit" id="authSubmitBtn" onclick="authEmailSubmit()">Войти</button>
+                <button type="button" class="auth-toggle-mode" id="authToggleMode" onclick="authToggleRegister()"></button>
+                <button type="button" class="auth-back-link" onclick="authBackToButtons()">← Назад к выбору</button>
+            </div>
+
+            <div class="auth-terms">Входя в приложение, вы принимаете условия использования</div>
+        </div>
+    </div>
+
+    <div class="top-bar" id="appTopBar">
         <div class="menu-burger" onclick="toggleSocialMenu()">
             <span></span><span></span><span></span>
         </div>
@@ -162,6 +409,16 @@
     <div class="social-dropdown" id="socialModal" onclick="if(event.target === this) toggleSocialMenu()">
         <div class="social-box">
             <div class="social-title">Наши соцсети</div>
+            <div id="authUserProfile" style="display:none; margin-bottom:16px; padding:14px; background:rgba(255,255,255,0.04); border-radius:16px; border:1px solid var(--glass-border);">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+                    <div id="authProfileAvatar" style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#aa3300);display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:16px;flex-shrink:0;overflow:hidden;"></div>
+                    <div>
+                        <div id="authProfileName" style="font-weight:800; font-size:15px;"></div>
+                        <div id="authProfileEmail" style="font-size:12px; color:var(--text-muted);"></div>
+                    </div>
+                </div>
+                <button type="button" class="social-link" style="margin:0; text-align:center; color:#ff4444; border-color:rgba(255,0,0,0.2);" onclick="authSignOut()">Выйти из аккаунта</button>
+            </div>
             <div id="socialLinksContainer"></div>
             <button type="button" class="dev-trigger" onclick="openPasswordModal()">Для разработчика</button>
         </div>
@@ -199,6 +456,7 @@
             <input type="text" id="nVideo" class="admin-input" placeholder="Ссылка на видео (YouTube или MP4)">
             <input type="file" id="nImgFile" class="admin-input" accept="image/*">
             <button type="button" class="admin-btn-save" onclick="saveNews()">Опубликовать новость</button>
+            <button type="button" class="ai-admin-btn" onclick="aiGenerateNews()" id="aiNewsBtnAdmin">✨ AI: Написать новость по теме</button>
         </div>
     </div>
 
@@ -259,6 +517,7 @@
             <input type="text" id="pCustomPos" class="admin-input" placeholder="Позиция (напр. ЗАП ЦН)" style="display:none; margin-top:15px;">
             <input type="file" id="pPhotoFile" class="admin-input" accept="image/*" style="margin-top:15px;">
             <button type="button" class="admin-btn-save" onclick="savePlayer()">Сохранить игрока</button>
+            <button type="button" class="ai-admin-btn" onclick="aiGeneratePlayerBio()" id="aiBioBtn">✨ AI: Описание игрока</button>
         </div>
     </div>
 
@@ -293,8 +552,195 @@
             <input type="text" id="tgLinkInput" class="admin-input" placeholder="Ссылка на Telegram">
             <input type="text" id="maxLinkInput" class="admin-input" placeholder="Ссылка на MAX">
             <button type="button" class="admin-btn-save" onclick="saveSocialLinks()">Сохранить соцсети</button>
+
+            <h3 style="color:var(--primary); margin: 30px 0 10px;">🤖 Настройки AI</h3>
+            <label style="color:#aaa; font-size:12px; margin-bottom:5px; display:block;">API ключ Google Gemini (бесплатно на <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--primary)">aistudio.google.com</a>):</label>
+            <input type="text" id="aiKeyInput" class="admin-input" placeholder="AIza...">
+            <button type="button" class="admin-btn-save" onclick="saveAISettings()">Сохранить AI ключ</button>
         </div>
     </div>
+
+    <!-- ===== НОВЫЕ ЭКРАНЫ (ДОБАВЛЕНО) ===== -->
+
+    <!-- 5. СТАТИСТИКА -->
+    <div id="screen-stats" class="screen">
+        <div class="glass-card">
+            <div class="match-header">📊 Бомбардиры сезона</div>
+            <div class="stats-table-wrap" id="playerStatsContainer"></div>
+        </div>
+        <div class="glass-card">
+            <div class="match-header">🏆 Турнирная таблица</div>
+            <div class="stats-table-wrap" id="standingsContainer"></div>
+        </div>
+        <div class="admin-controls">
+            <h3 style="color:var(--primary); margin-bottom:10px;">🛠️ Статистика игрока</h3>
+            <input type="text" id="statPlayerName" class="admin-input" placeholder="Фамилия игрока">
+            <div class="input-row">
+                <input type="number" id="statGoals" class="admin-input" placeholder="Голы">
+                <input type="number" id="statAssists" class="admin-input" placeholder="Передачи">
+            </div>
+            <div class="input-row">
+                <input type="number" id="statGames" class="admin-input" placeholder="Игры">
+                <input type="number" id="statPenalties" class="admin-input" placeholder="Штрафы">
+            </div>
+            <button type="button" class="admin-btn-save" onclick="savePlayerStat()">Сохранить статистику</button>
+
+            <h3 style="color:var(--primary); margin:30px 0 10px;">🛠️ Команда в таблице</h3>
+            <input type="text" id="standTeamName" class="admin-input" placeholder="Название команды">
+            <div class="input-row">
+                <input type="number" id="standWins" class="admin-input" placeholder="Побед">
+                <input type="number" id="standDraws" class="admin-input" placeholder="Ничьих">
+                <input type="number" id="standLosses" class="admin-input" placeholder="Пораж.">
+            </div>
+            <div class="input-row">
+                <input type="number" id="standGF" class="admin-input" placeholder="Голов забито">
+                <input type="number" id="standGA" class="admin-input" placeholder="Голов пропущ.">
+            </div>
+            <button type="button" class="admin-btn-save" onclick="saveStanding()">Сохранить в таблицу</button>
+        </div>
+    </div>
+
+    <!-- 6. ГАЛЕРЕЯ -->
+    <div id="screen-gallery" class="screen">
+        <div class="gallery-albums" id="galleryContainer"></div>
+        <div class="admin-controls">
+            <h3 style="color:var(--primary); margin-bottom:10px;">🛠️ Добавить фото</h3>
+            <input type="text" id="galAlbum" class="admin-input" placeholder="Название альбома">
+            <input type="text" id="galCaption" class="admin-input" placeholder="Подпись к фото">
+            <input type="file" id="galPhotoFile" class="admin-input" accept="image/*">
+            <button type="button" class="admin-btn-save" onclick="saveGalleryPhoto()">Загрузить фото</button>
+        </div>
+    </div>
+
+    <!-- 7. LIVE -->
+    <div id="screen-live" class="screen">
+        <div id="liveMatchContainer"></div>
+        <div class="glass-card" id="liveEventsCard" style="display:none;">
+            <div class="match-header">⚡ Лента событий</div>
+            <div class="live-events-list" id="liveEventsList"></div>
+        </div>
+        <div class="admin-controls">
+            <h3 style="color:var(--primary); margin-bottom:10px;">🛠️ Управление Live-матчем</h3>
+            <div class="input-row">
+                <input type="text" id="liveHome" class="admin-input" placeholder="Хозяева" value="Феникс">
+                <input type="text" id="liveAway" class="admin-input" placeholder="Гости">
+            </div>
+            <button type="button" class="admin-btn-save" onclick="startLiveMatch()" style="margin-bottom:10px;">🏒 Начать Live-матч</button>
+            <button type="button" class="admin-btn-save" style="background:#c00; margin-bottom:15px;" onclick="endLiveMatch()">⏹ Завершить матч</button>
+            
+            <div class="live-admin-row">
+                <button type="button" class="admin-btn-save" onclick="liveScoreChange('home', 1)">Гол 🏠+1</button>
+                <button type="button" class="admin-btn-save" onclick="liveScoreChange('away', 1)">Гол 🏟+1</button>
+            </div>
+            <div class="live-admin-row">
+                <button type="button" class="admin-btn-save" style="background:#555;" onclick="liveScoreChange('home', -1)">🏠 -1</button>
+                <button type="button" class="admin-btn-save" style="background:#555;" onclick="liveScoreChange('away', -1)">🏟 -1</button>
+            </div>
+            <div class="input-row" style="margin-bottom:10px;">
+                <select id="livePeriod" class="admin-input">
+                    <option value="1">1-й период</option><option value="2">2-й период</option><option value="3">3-й период</option><option value="OT">Овертайм</option>
+                </select>
+            </div>
+            <button type="button" class="admin-btn-save" style="background:#1976d2; margin-bottom:10px;" onclick="setLivePeriod()">Установить период</button>
+            
+            <h3 style="color:var(--primary); margin:15px 0 10px;">📝 Добавить событие</h3>
+            <select id="liveEvType" class="admin-input">
+                <option value="goal">⚽ Гол</option><option value="penalty">🟨 Удаление</option><option value="save">🧤 Сейв</option><option value="timeout">⏸ Тайм-аут</option>
+            </select>
+            <div class="input-row">
+                <select id="liveEvTeam" class="admin-input"><option value="home">Хозяева</option><option value="away">Гости</option></select>
+                <input type="text" id="liveEvPlayer" class="admin-input" placeholder="Игрок">
+            </div>
+            <input type="text" id="liveEvTime" class="admin-input" placeholder="Время (напр. 12:30)">
+            <button type="button" class="admin-btn-save" onclick="addLiveEvent()">Добавить событие</button>
+        </div>
+    </div>
+
+    <!-- 8. ТРЕНИРОВКИ -->
+    <div id="screen-schedule" class="screen">
+        <div id="scheduleContainer"></div>
+        <div class="admin-controls">
+            <h3 style="color:var(--primary); margin-bottom:10px;">🛠️ Добавить тренировку</h3>
+            <select id="schedDay" class="admin-input">
+                <option value="Пн">Понедельник</option><option value="Вт">Вторник</option><option value="Ср">Среда</option>
+                <option value="Чт">Четверг</option><option value="Пт">Пятница</option><option value="Сб">Суббота</option><option value="Вс">Воскресенье</option>
+            </select>
+            <input type="text" id="schedTime" class="admin-input" placeholder="Время (напр. 18:00 - 19:30)">
+            <input type="text" id="schedPlace" class="admin-input" placeholder="Место">
+            <select id="schedType" class="admin-input">
+                <option value="Тренировка">🏋️ Тренировка</option><option value="Игра">🏒 Игра</option><option value="Сбор">📋 Сбор</option>
+            </select>
+            <input type="text" id="schedNote" class="admin-input" placeholder="Примечание">
+            <button type="button" class="admin-btn-save" onclick="saveScheduleItem()">Добавить в расписание</button>
+        </div>
+    </div>
+
+    <!-- 9. ПРОГНОЗЫ -->
+    <div id="screen-predictions" class="screen">
+        <div id="predictionsContainer"></div>
+        <div class="admin-controls">
+            <h3 style="color:var(--primary); margin-bottom:10px;">🛠️ Создать прогноз на матч</h3>
+            <input type="text" id="predMatch" class="admin-input" placeholder="Матч (напр. Феникс vs Титан)">
+            <input type="date" id="predDate" class="admin-input">
+            <button type="button" class="admin-btn-save" onclick="createPrediction()">Создать прогноз</button>
+        </div>
+    </div>
+
+    <!-- ===== НОВЫЕ МОДАЛКИ (ДОБАВЛЕНО) ===== -->
+
+    <!-- Профиль игрока -->
+    <div class="social-dropdown" id="playerProfileModal" onclick="if(event.target===this)this.classList.remove('active')">
+        <div class="social-box" style="max-width:360px;">
+            <div class="profile-content" id="profileContent"></div>
+            <button type="button" class="dev-trigger" onclick="document.getElementById('playerProfileModal').classList.remove('active')" style="margin-top:15px;">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Достижения -->
+    <div class="social-dropdown" id="achievementsModal" onclick="if(event.target===this)this.classList.remove('active')">
+        <div class="social-box" style="max-width:400px;">
+            <div class="social-title">🏆 Мои достижения</div>
+            <div class="achieve-grid" id="achieveGrid"></div>
+            <button type="button" class="dev-trigger" onclick="document.getElementById('achievementsModal').classList.remove('active')" style="margin-top:15px;">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div class="notif-panel" id="notifPanel" onclick="if(event.target===this)this.classList.remove('active')">
+        <div class="social-box" style="max-width:360px;">
+            <div class="social-title">🔔 Уведомления</div>
+            <div class="notif-list" id="notifList"></div>
+            <button type="button" class="dev-trigger" onclick="document.getElementById('notifPanel').classList.remove('active')" style="margin-top:15px;">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Лайтбокс -->
+    <div class="lightbox-overlay" id="lightboxOverlay" onclick="if(event.target===this)closeLightbox()">
+        <button type="button" class="lightbox-close" onclick="closeLightbox()">✕</button>
+        <button type="button" class="lightbox-nav lightbox-prev" onclick="navLightbox(-1)">❮</button>
+        <button type="button" class="lightbox-nav lightbox-next" onclick="navLightbox(1)">❯</button>
+        <img id="lightboxImg" class="lightbox-img" src="" alt="">
+        <div id="lightboxCaption" class="lightbox-caption"></div>
+    </div>
+
+    <!-- AI Chat Widget -->
+    <button type="button" class="ai-fab" onclick="toggleAIChat()" id="aiFab">🤖</button>
+    <div class="ai-panel" id="aiPanel">
+        <div class="ai-panel-header">
+            <div class="ai-panel-title">🤖 Феникс-бот</div>
+            <button type="button" class="ai-panel-close" onclick="toggleAIChat()">✕</button>
+        </div>
+        <div class="ai-messages" id="aiMessages">
+            <div class="ai-msg bot">Привет! 🏒 Я Феникс-бот — AI-ассистент команды. Спроси меня о команде, расписании, игроках или флорболе!</div>
+        </div>
+        <div class="ai-input-area">
+            <input type="text" class="ai-input" id="aiInput" placeholder="Спросить бота..." onkeydown="if(event.key==='Enter')sendAIMessage()">
+            <button type="button" class="ai-send" onclick="sendAIMessage()">➤</button>
+        </div>
+    </div>
+
+    <!-- Кнопка достижений -->
+    <div class="achieve-trigger" onclick="openAchievements()">🏆</div>
 
     <script>
         // РЕГИСТРАЦИЯ PWA (ДЛЯ УСТАНОВКИ КАК ПРИЛОЖЕНИЕ НА ТЕЛЕФОН)
@@ -457,6 +903,7 @@
                     <div class="news-actions">
                         <button type="button" class="na-btn" onclick="likeNews('${id}')">❤️ ${likes}</button>
                         <button type="button" class="na-btn" onclick="toggleNewsComments('${id}')">💬 ${commentsCount}</button>
+                        <button type="button" class="share-btn" onclick="shareNews('${n.title}', '${(n.text||'').substring(0,100).replace(/'/g,"\\'")}')">📤</button>
                     </div>
                     <div class="news-comments-section" style="display: ${openNewsComments[id] ? 'block' : 'none'};">
                         <div class="nc-list">${commentsHtml}</div>
@@ -654,5 +1101,982 @@
             alert("Фоновая картинка удалена!");
         }
     </script>
+
+    <!-- ===== НОВЫЙ ФУНКЦИОНАЛ (ДОБАВЛЕНО) ===== -->
+    <script>
+    (function() {
+        'use strict';
+
+        // ===== Расширяем localData для новых фич =====
+        localData.stats = {};
+        localData.standings = {};
+        localData.gallery = {};
+        localData.liveMatch = null;
+        localData.schedule = {};
+        localData.predictions = {};
+        localData.aiSettings = {};
+
+        // Подписываемся на новые Firebase-ноды
+        const newRefs = ['stats', 'standings', 'gallery', 'liveMatch', 'schedule', 'predictions', 'aiSettings'];
+        newRefs.forEach(ref => {
+            db.ref(ref).on('value', snap => {
+                localData[ref] = snap.val() || (ref === 'liveMatch' ? null : {});
+                renderNewFeatures();
+            });
+        });
+
+        // ===== Динамические табы =====
+        const nav = document.querySelector('.top-nav');
+        const newTabs = [
+            { id: 'stats', label: '📊 Стат' },
+            { id: 'gallery', label: '📸 Фото' },
+            { id: 'live', label: '🔴 Live' },
+            { id: 'schedule', label: '📋 График' },
+            { id: 'predictions', label: '🎯 Прогнозы' }
+        ];
+        newTabs.forEach(t => {
+            const btn = document.createElement('button');
+            btn.type = 'button'; btn.className = 'tab-pill';
+            btn.textContent = t.label;
+            btn.onclick = function() { switchTab(t.id, this); };
+            nav.appendChild(btn);
+        });
+
+        // ===== Колокольчик уведомлений =====
+        const header = document.querySelector('.header');
+        const bell = document.createElement('div');
+        bell.className = 'notif-bell';
+        bell.innerHTML = '🔔<span class="notif-badge" id="notifBadge" style="display:none;">0</span>';
+        bell.onclick = function() { openNotifications(); };
+        header.style.position = 'relative';
+        header.appendChild(bell);
+
+        // ===== Поиск =====
+        const topBar = document.querySelector('.top-bar');
+        const searchDiv = document.createElement('div');
+        searchDiv.className = 'search-container';
+        searchDiv.innerHTML = '<div class="search-box"><input type="text" class="search-input" id="globalSearchInput" placeholder="🔍 Поиск..."><button type="button" class="search-clear" id="searchClearBtn" style="display:none;" onclick="clearSearch()">✕</button></div>';
+        topBar.after(searchDiv);
+        document.getElementById('globalSearchInput').addEventListener('input', function() {
+            const q = this.value.trim().toLowerCase();
+            document.getElementById('searchClearBtn').style.display = q ? 'block' : 'none';
+            performSearch(q);
+        });
+
+        // ===== Язык в соцсетях-меню =====
+        const socialBox = document.querySelector('#socialModal .social-box');
+        const langDiv = document.createElement('div');
+        langDiv.className = 'lang-toggle';
+        langDiv.innerHTML = '<button type="button" class="lang-btn active" onclick="setLang(\'ru\', this)">🇷🇺 RU</button><button type="button" class="lang-btn" onclick="setLang(\'en\', this)">🇬🇧 EN</button>';
+        socialBox.appendChild(langDiv);
+
+        // ===== Переопределяем renderAll =====
+        const _origRenderAll = renderAll;
+        renderAll = function() {
+            _origRenderAll();
+            renderNewFeatures();
+            updateNotifications();
+            addPlayerClickHandlers();
+        };
+
+        // ===== Трекинг достижений — обёртки =====
+        const _origSendChat = sendChat;
+        sendChat = function(room) {
+            _origSendChat(room);
+            trackAchieve('messages');
+        };
+        const _origLikeNews = likeNews;
+        likeNews = function(id) {
+            _origLikeNews(id);
+            trackAchieve('likes');
+        };
+        const _origSubmitVote = submitVote;
+        submitVote = function() {
+            _origSubmitVote();
+            trackAchieve('votes');
+        };
+
+        // ===== РЕНДЕР НОВЫХ ФИЧ =====
+        function renderNewFeatures() {
+            renderStats();
+            renderGallery();
+            renderLive();
+            renderSchedule();
+            renderPredictions();
+            if (document.getElementById('aiKeyInput')) {
+                document.getElementById('aiKeyInput').value = (localData.aiSettings && localData.aiSettings.apiKey) || '';
+            }
+        }
+        window.renderNewFeatures = renderNewFeatures;
+
+        // ----- Статистика -----
+        function renderStats() {
+            const statsArr = Object.entries(localData.stats || {});
+            statsArr.sort((a, b) => ((b[1].goals||0) + (b[1].assists||0)) - ((a[1].goals||0) + (a[1].assists||0)));
+            let html = '<table class="stats-tbl"><tr><th>#</th><th>Игрок</th><th>И</th><th>Г</th><th>П</th><th>О</th><th>Штр</th></tr>';
+            statsArr.forEach(([id, s], i) => {
+                let pts = (s.goals||0) + (s.assists||0);
+                let del = isAdmin ? ` <span style="color:red;cursor:pointer;font-size:11px;" onclick="deleteItem('stats','${id}')">✖</span>` : '';
+                html += `<tr><td class="stats-rank">${i+1}</td><td>${s.name}${del}</td><td>${s.games||0}</td><td>${s.goals||0}</td><td>${s.assists||0}</td><td style="color:var(--primary);font-weight:900;">${pts}</td><td>${s.penalties||0}</td></tr>`;
+            });
+            html += '</table>';
+            document.getElementById('playerStatsContainer').innerHTML = statsArr.length ? html : '<div style="text-align:center;color:var(--text-muted);padding:20px;">Данных пока нет</div>';
+
+            const standArr = Object.entries(localData.standings || {});
+            standArr.sort((a, b) => ((b[1].wins||0)*3 + (b[1].draws||0)) - ((a[1].wins||0)*3 + (a[1].draws||0)));
+            let sHtml = '<table class="stats-tbl"><tr><th>#</th><th>Команда</th><th>В</th><th>Н</th><th>П</th><th>ГЗ-ГП</th><th>О</th></tr>';
+            standArr.forEach(([id, t], i) => {
+                let pts = (t.wins||0)*3 + (t.draws||0);
+                let cls = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+                let posHtml = cls ? `<span class="standing-pos ${cls}">${i+1}</span>` : (i+1);
+                let del = isAdmin ? ` <span style="color:red;cursor:pointer;font-size:11px;" onclick="deleteItem('standings','${id}')">✖</span>` : '';
+                sHtml += `<tr><td>${posHtml}</td><td>${t.name}${del}</td><td>${t.wins||0}</td><td>${t.draws||0}</td><td>${t.losses||0}</td><td>${t.gf||0}-${t.ga||0}</td><td style="color:var(--primary);font-weight:900;">${pts}</td></tr>`;
+            });
+            sHtml += '</table>';
+            document.getElementById('standingsContainer').innerHTML = standArr.length ? sHtml : '<div style="text-align:center;color:var(--text-muted);padding:20px;">Данных пока нет</div>';
+        }
+
+        // ----- Галерея -----
+        let galleryPhotos = [];
+        let lightboxIndex = 0;
+
+        function renderGallery() {
+            const gal = localData.gallery || {};
+            const albums = {};
+            galleryPhotos = [];
+            Object.entries(gal).forEach(([id, p]) => {
+                let album = p.album || 'Без альбома';
+                if (!albums[album]) albums[album] = [];
+                albums[album].push({ id, ...p });
+                galleryPhotos.push({ id, ...p });
+            });
+            let html = '';
+            Object.entries(albums).forEach(([name, photos]) => {
+                let del = isAdmin ? `<span style="font-size:12px;color:red;cursor:pointer;" onclick="deleteAlbum('${name}')">Удалить альбом</span>` : '';
+                html += `<div class="glass-card"><div class="gallery-album-title"><span>📸 ${name}</span>${del}</div><div class="gallery-grid">`;
+                photos.forEach((p, i) => {
+                    let idx = galleryPhotos.findIndex(gp => gp.id === p.id);
+                    let delP = isAdmin ? `<button type="button" class="delete-btn" style="display:flex;position:absolute;top:2px;right:2px;width:22px;height:22px;font-size:10px;z-index:10;" onclick="event.stopPropagation();deleteItem('gallery','${p.id}')">✖</button>` : '';
+                    html += `<div style="position:relative;">${delP}<img src="${p.img}" class="gallery-thumb" onclick="openLightbox(${idx})"></div>`;
+                });
+                html += '</div></div>';
+            });
+            document.getElementById('galleryContainer').innerHTML = html || '<div class="glass-card" style="text-align:center;color:var(--text-muted);">Фотографий пока нет</div>';
+        }
+
+        window.openLightbox = function(idx) {
+            lightboxIndex = idx;
+            const p = galleryPhotos[idx];
+            if (!p) return;
+            document.getElementById('lightboxImg').src = p.img;
+            document.getElementById('lightboxCaption').textContent = p.caption || '';
+            document.getElementById('lightboxOverlay').classList.add('active');
+        };
+        window.closeLightbox = function() {
+            document.getElementById('lightboxOverlay').classList.remove('active');
+        };
+        window.navLightbox = function(dir) {
+            lightboxIndex = (lightboxIndex + dir + galleryPhotos.length) % galleryPhotos.length;
+            const p = galleryPhotos[lightboxIndex];
+            document.getElementById('lightboxImg').src = p.img;
+            document.getElementById('lightboxCaption').textContent = p.caption || '';
+        };
+        window.deleteAlbum = function(name) {
+            if (!confirm('Удалить весь альбом "' + name + '"?')) return;
+            Object.entries(localData.gallery || {}).forEach(([id, p]) => {
+                if ((p.album || 'Без альбома') === name) db.ref('gallery/' + id).remove();
+            });
+        };
+
+        // ----- Live Матч -----
+        function renderLive() {
+            const lm = localData.liveMatch;
+            const container = document.getElementById('liveMatchContainer');
+            const evCard = document.getElementById('liveEventsCard');
+            if (!lm || !lm.active) {
+                container.innerHTML = '<div class="live-no-match">🏒 Сейчас нет активного матча<br><span style="font-size:13px;">Когда начнётся игра, здесь появится live-трансляция счёта</span></div>';
+                evCard.style.display = 'none';
+                return;
+            }
+            container.innerHTML = `
+                <div class="live-board">
+                    <div class="live-badge">● LIVE</div>
+                    <div class="live-teams">
+                        <div class="live-team-name">${lm.homeTeam || 'Феникс'}</div>
+                        <div class="live-score-big">${lm.homeScore || 0} : ${lm.awayScore || 0}</div>
+                        <div class="live-team-name">${lm.awayTeam || 'Гости'}</div>
+                    </div>
+                    <div class="live-period">${lm.period ? lm.period + '-й период' : ''}</div>
+                </div>
+            `;
+            const events = lm.events ? Object.entries(lm.events) : [];
+            if (events.length > 0) {
+                evCard.style.display = 'block';
+                const icons = { goal: '⚽', penalty: '🟨', save: '🧤', timeout: '⏸' };
+                document.getElementById('liveEventsList').innerHTML = events.map(([eid, ev]) => {
+                    let del = isAdmin ? `<span style="color:red;cursor:pointer;margin-left:auto;font-size:11px;" onclick="deleteItem('liveMatch/events','${eid}')">✖</span>` : '';
+                    return `<div class="live-event"><span class="live-event-icon">${icons[ev.type]||'📌'}</span><span class="live-event-time">${ev.time||''}</span><span>${ev.team==='home'?(lm.homeTeam||'Феникс'):(lm.awayTeam||'Гости')} — ${ev.player||''}</span>${del}</div>`;
+                }).reverse().join('');
+            } else {
+                evCard.style.display = 'none';
+            }
+        }
+
+        window.startLiveMatch = function() {
+            db.ref('liveMatch').set({
+                active: true,
+                homeTeam: document.getElementById('liveHome').value || 'Феникс',
+                awayTeam: document.getElementById('liveAway').value || 'Гости',
+                homeScore: 0, awayScore: 0,
+                period: 1, events: {}
+            });
+            alert('Live-матч начат!');
+        };
+        window.endLiveMatch = function() {
+            if (confirm('Завершить Live-матч?')) db.ref('liveMatch').set(null);
+        };
+        window.liveScoreChange = function(team, delta) {
+            const lm = localData.liveMatch;
+            if (!lm || !lm.active) return;
+            let key = team === 'home' ? 'homeScore' : 'awayScore';
+            let val = Math.max(0, (lm[key] || 0) + delta);
+            db.ref('liveMatch/' + key).set(val);
+        };
+        window.setLivePeriod = function() {
+            db.ref('liveMatch/period').set(document.getElementById('livePeriod').value);
+        };
+        window.addLiveEvent = function() {
+            const lm = localData.liveMatch;
+            if (!lm || !lm.active) return;
+            db.ref('liveMatch/events').push({
+                type: document.getElementById('liveEvType').value,
+                team: document.getElementById('liveEvTeam').value,
+                player: document.getElementById('liveEvPlayer').value,
+                time: document.getElementById('liveEvTime').value,
+                period: lm.period || 1
+            });
+            document.getElementById('liveEvPlayer').value = '';
+            document.getElementById('liveEvTime').value = '';
+            alert('Событие добавлено!');
+        };
+
+        // ----- Расписание -----
+        function renderSchedule() {
+            const items = Object.entries(localData.schedule || {});
+            const dayOrder = { 'Пн': 1, 'Вт': 2, 'Ср': 3, 'Чт': 4, 'Пт': 5, 'Сб': 6, 'Вс': 7 };
+            items.sort((a, b) => (dayOrder[a[1].day]||99) - (dayOrder[b[1].day]||99));
+            let html = items.map(([id, s]) => {
+                let del = isAdmin ? `<button type="button" class="delete-btn" style="display:flex;position:relative;top:0;right:0;width:24px;height:24px;font-size:11px;flex-shrink:0;" onclick="deleteItem('schedule','${id}')">✖</button>` : '';
+                let typeIcons = { 'Тренировка': '🏋️', 'Игра': '🏒', 'Сбор': '📋' };
+                return `<div class="sched-card"><div class="sched-day-badge">${s.day}</div><div class="sched-info"><div class="sched-type">${typeIcons[s.type]||'📌'} ${s.type}</div><div class="sched-time">${s.time}</div><div class="sched-place">📍 ${s.place}</div>${s.note ? '<div class="sched-note">'+s.note+'</div>' : ''}</div>${del}</div>`;
+            }).join('');
+            document.getElementById('scheduleContainer').innerHTML = html || '<div class="glass-card" style="text-align:center;color:var(--text-muted);">Расписание пока не добавлено</div>';
+        }
+
+        window.saveScheduleItem = function() {
+            db.ref('schedule').push({
+                day: document.getElementById('schedDay').value,
+                time: document.getElementById('schedTime').value,
+                place: document.getElementById('schedPlace').value,
+                type: document.getElementById('schedType').value,
+                note: document.getElementById('schedNote').value
+            });
+            document.getElementById('schedTime').value = '';
+            document.getElementById('schedPlace').value = '';
+            document.getElementById('schedNote').value = '';
+            alert('Добавлено в расписание!');
+        };
+
+        // ----- Прогнозы -----
+        function renderPredictions() {
+            const preds = Object.entries(localData.predictions || {});
+            preds.sort((a, b) => new Date(b[1].date || 0) - new Date(a[1].date || 0));
+            let html = preds.map(([id, p]) => {
+                let del = isAdmin ? `<button type="button" class="delete-btn" style="display:flex;" onclick="deleteItem('predictions','${id}')">✖</button>` : '';
+                let isClosed = p.closed;
+                let entries = p.entries ? Object.entries(p.entries) : [];
+                let myPred = localStorage.getItem('phx_pred_' + id);
+
+                let contentHtml = '';
+                if (isClosed) {
+                    contentHtml += `<div class="pred-status"><span class="pred-closed-label">Завершён</span> Итог: ${p.actualHome||0} : ${p.actualAway||0}</div>`;
+                    if (entries.length) {
+                        contentHtml += '<div class="pred-results">';
+                        entries.sort((a, b) => {
+                            let da = Math.abs((a[1].h||0)-(p.actualHome||0)) + Math.abs((a[1].a||0)-(p.actualAway||0));
+                            let db2 = Math.abs((b[1].h||0)-(p.actualHome||0)) + Math.abs((b[1].a||0)-(p.actualAway||0));
+                            return da - db2;
+                        });
+                        entries.forEach(([eid, e], i) => {
+                            let cls = i === 0 ? ' class="pred-winner"' : '';
+                            contentHtml += `<div class="pred-result-row"><span${cls}>${i===0?'🏆 ':''}${e.name}</span><span${cls}>${e.h} : ${e.a}</span></div>`;
+                        });
+                        contentHtml += '</div>';
+                    }
+                } else if (myPred) {
+                    contentHtml += `<div class="pred-status">Ваш прогноз отправлен! ✅</div>`;
+                } else {
+                    contentHtml += `
+                        <div class="pred-input-row">
+                            <input type="number" class="pred-score-input" id="predH-${id}" placeholder="0" min="0">
+                            <span class="pred-vs">:</span>
+                            <input type="number" class="pred-score-input" id="predA-${id}" placeholder="0" min="0">
+                        </div>
+                        <button type="button" class="vote-btn" onclick="submitPrediction('${id}')">Отправить прогноз</button>
+                    `;
+                }
+
+                let adminClose = '';
+                if (isAdmin && !isClosed) {
+                    adminClose = `<div style="margin-top:12px;border-top:1px dashed var(--primary);padding-top:12px;">
+                        <div class="input-row" style="margin-bottom:8px;"><input type="number" id="predActH-${id}" class="admin-input" placeholder="Итог Хоз." style="margin:0;"><input type="number" id="predActA-${id}" class="admin-input" placeholder="Итог Гост." style="margin:0;"></div>
+                        <button type="button" class="admin-btn-save" onclick="closePrediction('${id}')">Закрыть прогноз</button>
+                    </div>`;
+                }
+
+                return `<div class="pred-card">${del}<div class="pred-title">🎯 ${p.match}</div><div class="pred-date">${formatDateReadable(p.date)} • ${entries.length} прогнозов</div>${contentHtml}${adminClose}</div>`;
+            }).join('');
+            document.getElementById('predictionsContainer').innerHTML = html || '<div class="glass-card" style="text-align:center;color:var(--text-muted);">Прогнозов пока нет</div>';
+        }
+
+        window.createPrediction = function() {
+            let match = document.getElementById('predMatch').value;
+            if (!match) return;
+            db.ref('predictions').push({
+                match: match,
+                date: document.getElementById('predDate').value,
+                closed: false, actualHome: null, actualAway: null, entries: {}
+            });
+            document.getElementById('predMatch').value = '';
+            alert('Прогноз создан!');
+        };
+        window.submitPrediction = function(id) {
+            let h = parseInt(document.getElementById('predH-' + id).value);
+            let a = parseInt(document.getElementById('predA-' + id).value);
+            if (isNaN(h) || isNaN(a) || h < 0 || a < 0) { alert('Введите корректный счёт!'); return; }
+            let name = fanNames[Math.floor(Math.random() * fanNames.length)] + Math.floor(Math.random() * 99);
+            db.ref('predictions/' + id + '/entries').push({ name, h, a });
+            localStorage.setItem('phx_pred_' + id, 'yes');
+            trackAchieve('predictions');
+            alert('Прогноз отправлен!');
+        };
+        window.closePrediction = function(id) {
+            let ah = parseInt(document.getElementById('predActH-' + id).value);
+            let aa = parseInt(document.getElementById('predActA-' + id).value);
+            if (isNaN(ah) || isNaN(aa)) { alert('Введите итоговый счёт!'); return; }
+            db.ref('predictions/' + id + '/closed').set(true);
+            db.ref('predictions/' + id + '/actualHome').set(ah);
+            db.ref('predictions/' + id + '/actualAway').set(aa);
+            alert('Прогноз закрыт!');
+        };
+
+        // ===== Статистика — сохранение =====
+        window.savePlayerStat = function() {
+            let name = document.getElementById('statPlayerName').value;
+            if (!name) return;
+            db.ref('stats').push({
+                name, goals: parseInt(document.getElementById('statGoals').value)||0,
+                assists: parseInt(document.getElementById('statAssists').value)||0,
+                games: parseInt(document.getElementById('statGames').value)||0,
+                penalties: parseInt(document.getElementById('statPenalties').value)||0
+            });
+            document.querySelectorAll('#screen-stats .admin-input').forEach(i => i.value = '');
+            alert('Статистика сохранена!');
+        };
+        window.saveStanding = function() {
+            let name = document.getElementById('standTeamName').value;
+            if (!name) return;
+            db.ref('standings').push({
+                name, wins: parseInt(document.getElementById('standWins').value)||0,
+                draws: parseInt(document.getElementById('standDraws').value)||0,
+                losses: parseInt(document.getElementById('standLosses').value)||0,
+                gf: parseInt(document.getElementById('standGF').value)||0,
+                ga: parseInt(document.getElementById('standGA').value)||0
+            });
+            document.querySelectorAll('#screen-stats .admin-input[id^="stand"]').forEach(i => i.value = '');
+            alert('Команда добавлена в таблицу!');
+        };
+
+        // ===== Галерея — сохранение =====
+        window.saveGalleryPhoto = async function() {
+            let img = await processFilePromise('galPhotoFile');
+            if (!img) { alert('Выберите фото!'); return; }
+            db.ref('gallery').push({
+                album: document.getElementById('galAlbum').value || 'Общий альбом',
+                caption: document.getElementById('galCaption').value,
+                img: img
+            });
+            document.getElementById('galCaption').value = '';
+            document.getElementById('galPhotoFile').value = '';
+            alert('Фото загружено!');
+        };
+
+        // ===== Уведомления =====
+        function updateNotifications() {
+            const newsArr = Object.keys(localData.news || {});
+            const lastSeen = parseInt(localStorage.getItem('phx_notif_seen') || '0');
+            const count = Math.max(0, newsArr.length - lastSeen);
+            const badge = document.getElementById('notifBadge');
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        window.openNotifications = function() {
+            const newsArr = Object.entries(localData.news || {}).reverse().slice(0, 15);
+            let html = newsArr.map(([id, n]) =>
+                `<div class="notif-item"><strong>${n.title}</strong><div class="notif-item-date">${n.date}</div></div>`
+            ).join('');
+            document.getElementById('notifList').innerHTML = html || '<div style="color:var(--text-muted);text-align:center;">Нет уведомлений</div>';
+            document.getElementById('notifPanel').classList.add('active');
+            localStorage.setItem('phx_notif_seen', Object.keys(localData.news || {}).length);
+            updateNotifications();
+        };
+
+        // ===== Поиск =====
+        window.performSearch = function(q) {
+            if (!q) {
+                document.querySelectorAll('.glass-card, .sched-card, .pred-card').forEach(el => el.style.display = '');
+                return;
+            }
+            const activeScreen = document.querySelector('.screen.active');
+            if (!activeScreen) return;
+            activeScreen.querySelectorAll('.glass-card, .sched-card, .pred-card').forEach(el => {
+                const text = el.textContent.toLowerCase();
+                el.style.display = text.includes(q) ? '' : 'none';
+            });
+        };
+        window.clearSearch = function() {
+            document.getElementById('globalSearchInput').value = '';
+            document.getElementById('searchClearBtn').style.display = 'none';
+            performSearch('');
+        };
+
+        // ===== Шеринг =====
+        window.shareNews = async function(title, text) {
+            const shareData = { title: 'ПХК Феникс: ' + title, text: text, url: window.location.href };
+            try {
+                if (navigator.share) { await navigator.share(shareData); }
+                else { await navigator.clipboard.writeText(title + '\n' + text + '\n' + window.location.href); alert('Скопировано!'); }
+            } catch (e) { /* пользователь отменил */ }
+        };
+
+        // ===== Профиль игрока =====
+        function addPlayerClickHandlers() {
+            document.querySelectorAll('.player-card').forEach(card => {
+                if (card.dataset.profileBound) return;
+                card.dataset.profileBound = 'true';
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', function(e) {
+                    if (e.target.closest('.delete-btn')) return;
+                    const nameEl = card.querySelector('.card-name');
+                    const posEl = card.querySelector('.card-pos');
+                    const ratingEl = card.querySelector('.card-rating');
+                    const photoEl = card.querySelector('.card-photo');
+                    if (!nameEl) return;
+                    const name = nameEl.textContent;
+                    const pos = posEl ? posEl.textContent : '';
+                    const rating = ratingEl ? ratingEl.textContent : '';
+                    const bgImg = photoEl ? photoEl.style.backgroundImage : '';
+
+                    // Ищем статистику
+                    let pStats = null;
+                    Object.values(localData.stats || {}).forEach(s => {
+                        if (s.name === name) pStats = s;
+                    });
+
+                    let statsHtml = '';
+                    if (pStats) {
+                        statsHtml = `<div class="profile-stats">
+                            <div class="profile-stat"><div class="profile-stat-val">${pStats.goals||0}</div><div class="profile-stat-label">Голы</div></div>
+                            <div class="profile-stat"><div class="profile-stat-val">${pStats.assists||0}</div><div class="profile-stat-label">Передачи</div></div>
+                            <div class="profile-stat"><div class="profile-stat-val">${pStats.games||0}</div><div class="profile-stat-label">Игры</div></div>
+                        </div>`;
+                    }
+
+                    document.getElementById('profileContent').innerHTML = `
+                        <div class="profile-photo" style="background-image:${bgImg}"></div>
+                        <div class="profile-name">${name}</div>
+                        <div class="profile-pos">${pos} • Рейтинг: ${rating}</div>
+                        ${statsHtml}
+                    `;
+                    document.getElementById('playerProfileModal').classList.add('active');
+                });
+            });
+        }
+
+        // ===== Достижения =====
+        const achievements = [
+            { id: 'first_msg', icon: '🔥', name: 'Первый шаг', desc: 'Отправь сообщение в чат', key: 'messages', need: 1 },
+            { id: 'fan5', icon: '❤️', name: 'Фанат', desc: 'Поставь 5 лайков', key: 'likes', need: 5 },
+            { id: 'voter3', icon: '⭐', name: 'Оценщик', desc: 'Проголосуй 3 раза', key: 'votes', need: 3 },
+            { id: 'predict3', icon: '🎯', name: 'Предсказатель', desc: '3 прогноза на матчи', key: 'predictions', need: 3 },
+            { id: 'chatter20', icon: '💬', name: 'Болтун', desc: '20 сообщений в чатах', key: 'messages', need: 20 },
+            { id: 'superfan', icon: '🏆', name: 'Ультрас', desc: 'Получи все значки', key: 'all', need: 5 }
+        ];
+
+        function getAchieveData() {
+            return JSON.parse(localStorage.getItem('phx_achieve') || '{"messages":0,"likes":0,"votes":0,"predictions":0}');
+        }
+
+        function trackAchieve(key) {
+            let data = getAchieveData();
+            data[key] = (data[key] || 0) + 1;
+            localStorage.setItem('phx_achieve', JSON.stringify(data));
+        }
+        window.trackAchieve = trackAchieve;
+
+        window.openAchievements = function() {
+            const data = getAchieveData();
+            let unlocked = 0;
+            let html = achievements.map(a => {
+                let current, isUnlocked;
+                if (a.key === 'all') {
+                    current = unlocked;
+                    isUnlocked = unlocked >= a.need;
+                } else {
+                    current = data[a.key] || 0;
+                    isUnlocked = current >= a.need;
+                }
+                if (isUnlocked && a.key !== 'all') unlocked++;
+                let progress = Math.min(100, Math.round((current / a.need) * 100));
+                return `<div class="achieve-item ${isUnlocked ? 'unlocked' : ''}">
+                    <div class="achieve-icon">${a.icon}</div>
+                    <div class="achieve-name">${a.name}</div>
+                    <div class="achieve-desc">${a.desc}</div>
+                    <div class="achieve-progress"><div class="achieve-progress-bar" style="width:${progress}%"></div></div>
+                </div>`;
+            }).join('');
+            document.getElementById('achieveGrid').innerHTML = html;
+            document.getElementById('achievementsModal').classList.add('active');
+        };
+
+        // ===== Язык =====
+        let currentLang = localStorage.getItem('phx_lang') || 'ru';
+        const i18n = {
+            ru: { home: 'Главная', calendar: 'Календарь', squad: 'Состав', shop: 'Магазин', stats: '📊 Стат', gallery: '📸 Фото', live: '🔴 Live', schedule: '📋 График', predictions: '🎯 Прогнозы', search: '🔍 Поиск...', sendMsg: 'Написать сообщение...', vote: 'Проголосовать', socials: 'Наши соцсети' },
+            en: { home: 'Home', calendar: 'Calendar', squad: 'Squad', shop: 'Shop', stats: '📊 Stats', gallery: '📸 Photos', live: '🔴 Live', schedule: '📋 Schedule', predictions: '🎯 Predictions', search: '🔍 Search...', sendMsg: 'Write a message...', vote: 'Vote', socials: 'Our Socials' }
+        };
+
+        window.setLang = function(lang, btn) {
+            currentLang = lang;
+            localStorage.setItem('phx_lang', lang);
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyLang();
+        };
+
+        function applyLang() {
+            const t = i18n[currentLang];
+            const pills = document.querySelectorAll('.tab-pill');
+            const tabLabels = [t.home, t.calendar, t.squad, t.shop, t.stats, t.gallery, t.live, t.schedule, t.predictions];
+            pills.forEach((pill, i) => { if (tabLabels[i]) pill.textContent = tabLabels[i]; });
+            const searchInput = document.getElementById('globalSearchInput');
+            if (searchInput) searchInput.placeholder = t.search;
+        }
+
+        if (currentLang !== 'ru') setTimeout(applyLang, 100);
+
+        // ===== AI Integration (Google Gemini) =====
+        window.saveAISettings = function() {
+            let key = document.getElementById('aiKeyInput').value.trim();
+            db.ref('aiSettings').set({ apiKey: key });
+            alert('AI ключ сохранён!');
+        };
+
+        async function callGeminiAI(userPrompt, systemContext) {
+            const apiKey = localData.aiSettings && localData.aiSettings.apiKey;
+            if (!apiKey) {
+                return 'API ключ не настроен. Попросите администратора добавить ключ Google Gemini в настройках (Магазин → 🤖 Настройки AI).';
+            }
+            try {
+                const resp = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        system_instruction: { parts: [{ text: systemContext }] },
+                        contents: [{ parts: [{ text: userPrompt }] }],
+                        generationConfig: { maxOutputTokens: 800, temperature: 0.8 }
+                    })
+                });
+                const data = await resp.json();
+                if (data.error) return 'Ошибка AI: ' + (data.error.message || 'Неизвестная ошибка');
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Нет ответа от AI';
+            } catch (e) {
+                return 'Ошибка соединения с AI. Проверьте интернет.';
+            }
+        }
+
+        function buildTeamContext() {
+            let ctx = 'Ты — Феникс-бот, AI-ассистент флорбольной команды "Феникс" (ПХК Феникс). Отвечай на русском, коротко и дружелюбно. Ты знаешь о флорболе всё.\n\n';
+            const players = Object.values(localData.players || {});
+            if (players.length) {
+                ctx += 'Игроки команды: ' + players.map(p => p.name + ' (' + p.posName + ', рейтинг ' + p.baseRating + ')').join(', ') + '.\n';
+            }
+            const nm = localData.nextMatch;
+            if (nm) ctx += 'Ближайший матч: Феникс vs ' + nm.opponent + ' — ' + formatDateReadable(nm.date) + ', ' + (nm.arena || '') + '.\n';
+            const news = Object.values(localData.news || {}).slice(-3);
+            if (news.length) {
+                ctx += 'Последние новости: ' + news.map(n => n.title).join('; ') + '.\n';
+            }
+            const sched = Object.values(localData.schedule || {});
+            if (sched.length) {
+                ctx += 'Расписание: ' + sched.map(s => s.day + ' ' + s.time + ' ' + s.type + ' (' + s.place + ')').join('; ') + '.\n';
+            }
+            return ctx;
+        }
+
+        // AI Chat
+        let aiChatHistory = [];
+
+        window.toggleAIChat = function() {
+            document.getElementById('aiPanel').classList.toggle('active');
+        };
+
+        window.sendAIMessage = async function() {
+            const input = document.getElementById('aiInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+
+            const messagesDiv = document.getElementById('aiMessages');
+            messagesDiv.innerHTML += `<div class="ai-msg user">${msg}</div>`;
+            messagesDiv.innerHTML += `<div class="ai-msg bot typing" id="aiTyping">Думаю...</div>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            aiChatHistory.push({ role: 'user', text: msg });
+            const historyText = aiChatHistory.slice(-6).map(m => (m.role === 'user' ? 'Пользователь' : 'Бот') + ': ' + m.text).join('\n');
+            const context = buildTeamContext() + '\nИстория разговора:\n' + historyText;
+
+            const reply = await callGeminiAI(msg, context);
+            aiChatHistory.push({ role: 'bot', text: reply });
+
+            const typingEl = document.getElementById('aiTyping');
+            if (typingEl) typingEl.remove();
+            messagesDiv.innerHTML += `<div class="ai-msg bot">${reply}</div>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        };
+
+        // AI Admin Helpers
+        window.aiGenerateNews = async function() {
+            const btn = document.getElementById('aiNewsBtnAdmin');
+            const topic = document.getElementById('nTitle').value;
+            if (!topic) { alert('Введите заголовок / тему новости'); return; }
+            btn.disabled = true; btn.textContent = '⏳ Генерирую...';
+            const text = await callGeminiAI(
+                'Напиши короткую новость (3-5 предложений) для команды по флорболу "Феникс" на тему: ' + topic,
+                'Ты — копирайтер спортивной команды "Феникс" по флорболу. Пиши ярко, эмоционально, по-русски. Без маркдаун-разметки.'
+            );
+            document.getElementById('nText').value = text;
+            btn.disabled = false; btn.textContent = '✨ AI: Написать новость по теме';
+        };
+
+        window.aiGeneratePlayerBio = async function() {
+            const btn = document.getElementById('aiBioBtn');
+            const name = document.getElementById('pName').value;
+            const pos = document.getElementById('pPos').selectedOptions[0].textContent;
+            if (!name) { alert('Введите имя игрока'); return; }
+            btn.disabled = true; btn.textContent = '⏳ Генерирую...';
+            const bio = await callGeminiAI(
+                'Напиши короткое описание (2-3 предложения) для флорболиста по имени ' + name + ', позиция: ' + pos,
+                'Ты — спортивный журналист. Пиши мотивирующе, по-русски. Без маркдаун.'
+            );
+            alert('Описание:\n\n' + bio);
+            btn.disabled = false; btn.textContent = '✨ AI: Описание игрока';
+        };
+
+    })();
+    </script>
+
+    <!-- ===== АВТОРИЗАЦИЯ (ДОБАВЛЕНО) ===== -->
+    <script>
+    (function() {
+        'use strict';
+
+        const auth = firebase.auth();
+        let currentUser = null;
+        let authIsRegisterMode = false;
+        let authEmailProvider = 'email';
+
+        // ===== Состояние авторизации =====
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                currentUser = {
+                    uid: user.uid,
+                    name: user.displayName || localStorage.getItem('phx_user_name') || 'Болельщик',
+                    email: user.email || '',
+                    photo: user.photoURL || '',
+                    provider: user.providerData[0]?.providerId || 'password'
+                };
+                onAuthSuccess();
+            } else {
+                // Проверяем гостевой режим
+                let guest = localStorage.getItem('phx_guest');
+                if (guest) {
+                    currentUser = { uid: 'guest', name: 'Гость', email: '', photo: '', provider: 'guest' };
+                    onAuthSuccess();
+                } else {
+                    currentUser = null;
+                    document.getElementById('authOverlay').classList.remove('hidden');
+                }
+            }
+        });
+
+        function onAuthSuccess() {
+            // Скрываем экран входа
+            document.getElementById('authOverlay').classList.add('hidden');
+
+            // Обновляем профиль в меню
+            updateProfileUI();
+
+            // Подменяем имя для чатов
+            overrideChatNames();
+        }
+
+        function updateProfileUI() {
+            if (!currentUser || currentUser.provider === 'guest') {
+                document.getElementById('authUserProfile').style.display = 'none';
+                // Убираем user-pill если был
+                let existingPill = document.getElementById('userPillEl');
+                if (existingPill) existingPill.style.display = 'none';
+                return;
+            }
+
+            // Профиль в соцменю
+            const profileDiv = document.getElementById('authUserProfile');
+            profileDiv.style.display = 'block';
+            document.getElementById('authProfileName').textContent = currentUser.name;
+            document.getElementById('authProfileEmail').textContent = currentUser.email;
+            const avatarDiv = document.getElementById('authProfileAvatar');
+            if (currentUser.photo) {
+                avatarDiv.innerHTML = '<img src="' + currentUser.photo + '" style="width:100%;height:100%;object-fit:cover;">';
+            } else {
+                avatarDiv.textContent = currentUser.name.charAt(0).toUpperCase();
+            }
+
+            // User pill в шапке (заменяет колокольчик-позицию)
+            let pill = document.getElementById('userPillEl');
+            if (!pill) {
+                pill = document.createElement('div');
+                pill.id = 'userPillEl';
+                pill.className = 'user-pill';
+                pill.onclick = function() { toggleSocialMenu(); };
+                const header = document.querySelector('.header');
+                header.appendChild(pill);
+            }
+            pill.style.display = 'flex';
+            let avatarHtml = currentUser.photo
+                ? '<img src="' + currentUser.photo + '">'
+                : currentUser.name.charAt(0).toUpperCase();
+            pill.innerHTML = '<div class="user-pill-avatar">' + avatarHtml + '</div><span class="user-pill-name">' + currentUser.name + '</span>';
+
+            // Сдвигаем колокольчик
+            const bell = document.querySelector('.notif-bell');
+            if (bell) {
+                bell.style.left = 'auto';
+                bell.style.right = '70px';
+                bell.style.top = '30px';
+            }
+        }
+
+        // ===== Подмена имени в чатах =====
+        function overrideChatNames() {
+            // Переопределяем sendChat чтобы использовать реальное имя
+            const prevSendChat = sendChat;
+            sendChat = function(room) {
+                const input = document.getElementById('input-' + room);
+                if (input && input.value.trim()) {
+                    const userName = getCurrentUserName();
+                    db.ref('chats/' + room).push({ name: userName, text: input.value.trim() });
+                    input.value = '';
+                    if (typeof trackAchieve === 'function') trackAchieve('messages');
+                }
+            };
+
+            // Переопределяем sendNewsComment
+            const origSendNC = window.sendNewsComment;
+            window.sendNewsComment = function(id) {
+                let input = document.getElementById('nc-input-' + id);
+                if (input && input.value.trim()) {
+                    db.ref('news/' + id + '/comments').push({
+                        name: getCurrentUserName(),
+                        text: input.value.trim()
+                    });
+                    input.value = '';
+                    openNewsComments[id] = true;
+                    if (typeof trackAchieve === 'function') trackAchieve('messages');
+                }
+            };
+        }
+
+        function getCurrentUserName() {
+            if (currentUser && currentUser.name && currentUser.provider !== 'guest') {
+                return currentUser.name;
+            }
+            return fanNames[Math.floor(Math.random() * fanNames.length)] + Math.floor(Math.random() * 99);
+        }
+
+        // ===== Google Sign-In =====
+        window.authSignInGoogle = async function() {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.addScope('profile');
+                provider.addScope('email');
+                await auth.signInWithPopup(provider);
+            } catch (e) {
+                if (e.code !== 'auth/popup-closed-by-user') {
+                    showAuthError('Google: ' + getAuthErrorMessage(e.code));
+                }
+            }
+        };
+
+        // ===== Apple Sign-In =====
+        window.authSignInApple = async function() {
+            try {
+                const provider = new firebase.auth.OAuthProvider('apple.com');
+                provider.addScope('email');
+                provider.addScope('name');
+                await auth.signInWithPopup(provider);
+            } catch (e) {
+                if (e.code !== 'auth/popup-closed-by-user') {
+                    showAuthError('Apple: ' + getAuthErrorMessage(e.code));
+                }
+            }
+        };
+
+        // ===== Email/Password форма =====
+        window.authShowEmailForm = function(provider) {
+            authEmailProvider = provider;
+            authIsRegisterMode = false;
+            document.getElementById('authButtons').style.display = 'none';
+            document.getElementById('authEmailForm').classList.add('active');
+            document.getElementById('authNameInput').style.display = 'none';
+
+            if (provider === 'yandex') {
+                document.getElementById('authFormTitle').textContent = '📧 Вход через Яндекс';
+                document.getElementById('authEmailInput').placeholder = 'login@yandex.ru';
+            } else {
+                document.getElementById('authFormTitle').textContent = '✉️ Вход по Email';
+                document.getElementById('authEmailInput').placeholder = 'Email';
+            }
+            document.getElementById('authSubmitBtn').textContent = 'Войти';
+            document.getElementById('authToggleMode').textContent = 'Нет аккаунта? Зарегистрироваться';
+            document.getElementById('authError').style.display = 'none';
+            document.getElementById('authEmailInput').value = '';
+            document.getElementById('authPassInput').value = '';
+            document.getElementById('authNameInput').value = '';
+        };
+
+        window.authToggleRegister = function() {
+            authIsRegisterMode = !authIsRegisterMode;
+            document.getElementById('authNameInput').style.display = authIsRegisterMode ? 'block' : 'none';
+            document.getElementById('authSubmitBtn').textContent = authIsRegisterMode ? 'Зарегистрироваться' : 'Войти';
+            document.getElementById('authToggleMode').textContent = authIsRegisterMode
+                ? 'Уже есть аккаунт? Войти'
+                : 'Нет аккаунта? Зарегистрироваться';
+            document.getElementById('authError').style.display = 'none';
+        };
+
+        window.authBackToButtons = function() {
+            document.getElementById('authButtons').style.display = 'block';
+            document.getElementById('authEmailForm').classList.remove('active');
+        };
+
+        window.authEmailSubmit = async function() {
+            const email = document.getElementById('authEmailInput').value.trim();
+            const pass = document.getElementById('authPassInput').value;
+            const name = document.getElementById('authNameInput').value.trim();
+            const btn = document.getElementById('authSubmitBtn');
+
+            if (!email || !pass) {
+                showAuthError('Заполните email и пароль');
+                return;
+            }
+            if (pass.length < 6) {
+                showAuthError('Пароль должен быть минимум 6 символов');
+                return;
+            }
+            if (authIsRegisterMode && !name) {
+                showAuthError('Введите ваше имя');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Подождите...';
+
+            try {
+                if (authIsRegisterMode) {
+                    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+                    await cred.user.updateProfile({ displayName: name });
+                    localStorage.setItem('phx_user_name', name);
+                } else {
+                    await auth.signInWithEmailAndPassword(email, pass);
+                }
+            } catch (e) {
+                showAuthError(getAuthErrorMessage(e.code));
+                btn.disabled = false;
+                btn.textContent = authIsRegisterMode ? 'Зарегистрироваться' : 'Войти';
+            }
+        };
+
+        // ===== Гостевой режим =====
+        window.authGuestLogin = function() {
+            localStorage.setItem('phx_guest', 'true');
+            currentUser = { uid: 'guest', name: 'Гость', email: '', photo: '', provider: 'guest' };
+            onAuthSuccess();
+        };
+
+        // ===== Выход =====
+        window.authSignOut = function() {
+            auth.signOut();
+            localStorage.removeItem('phx_guest');
+            localStorage.removeItem('phx_user_name');
+            currentUser = null;
+            document.getElementById('authUserProfile').style.display = 'none';
+            let pill = document.getElementById('userPillEl');
+            if (pill) pill.style.display = 'none';
+            document.getElementById('authOverlay').classList.remove('hidden');
+            document.getElementById('authButtons').style.display = 'block';
+            document.getElementById('authEmailForm').classList.remove('active');
+            toggleSocialMenu();
+        };
+
+        // ===== Хелперы =====
+        function showAuthError(msg) {
+            const el = document.getElementById('authError');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        function getAuthErrorMessage(code) {
+            const messages = {
+                'auth/user-not-found': 'Аккаунт не найден. Зарегистрируйтесь!',
+                'auth/wrong-password': 'Неверный пароль',
+                'auth/invalid-credential': 'Неверный email или пароль',
+                'auth/email-already-in-use': 'Email уже зарегистрирован. Войдите!',
+                'auth/weak-password': 'Слишком простой пароль (мин. 6 символов)',
+                'auth/invalid-email': 'Некорректный email',
+                'auth/too-many-requests': 'Слишком много попыток. Подождите и попробуйте позже',
+                'auth/network-request-failed': 'Ошибка сети. Проверьте интернет',
+                'auth/popup-blocked': 'Всплывающее окно заблокировано браузером. Разрешите всплывающие окна',
+                'auth/operation-not-allowed': 'Этот способ входа не настроен. Обратитесь к администратору',
+                'auth/account-exists-with-different-credential': 'Аккаунт уже существует с другим способом входа'
+            };
+            return messages[code] || 'Ошибка: ' + (code || 'неизвестная');
+        }
+
+        // Логотип на экране входа — берём из дизайна
+        db.ref('design/logo').on('value', snap => {
+            const logo = snap.val();
+            const authLogoEl = document.getElementById('authLogo');
+            if (logo && authLogoEl) authLogoEl.src = logo;
+        });
+
+    })();
+    </script>
+
 </body>
 </html>
