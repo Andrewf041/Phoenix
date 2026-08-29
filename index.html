@@ -38,7 +38,6 @@
         .screen.active { display: block; }
         @keyframes scaleIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Виджет ближайшего матча под плашками */
         .next-match-widget { background: linear-gradient(135deg, rgba(255,85,0,0.15) 0%, rgba(0,0,0,0.6) 100%); border: 1px solid var(--primary); border-radius: 24px; padding: 18px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
         .next-match-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); font-weight: 800; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .next-match-teams { display: flex; justify-content: space-between; align-items: center; }
@@ -129,11 +128,22 @@
         <span></span><span></span><span></span>
     </div>
 
+    <!-- Меню соцсетей -->
     <div class="social-dropdown" id="socialModal" onclick="if(event.target === this) toggleSocialMenu()">
         <div class="social-box">
             <div class="social-title">Наши соцсети</div>
             <div id="socialLinksContainer"></div>
-            <button class="dev-trigger" onclick="askAdmin()">Для разработчика</button>
+            <button class="dev-trigger" onclick="openPasswordModal()">Для разработчика</button>
+        </div>
+    </div>
+
+    <!-- Встроенное надежное окно ввода пароля -->
+    <div class="social-dropdown" id="passwordModal" onclick="if(event.target === this) closePasswordModal()">
+        <div class="social-box">
+            <div class="social-title">🔒 Вход для разработчика</div>
+            <input type="password" id="devPassInput" class="admin-input" placeholder="Введите пароль" style="text-align: center;">
+            <button class="admin-btn-save" onclick="checkDevPassword()">Войти</button>
+            <button class="dev-trigger" onclick="closePasswordModal()" style="margin-top:15px;">Отмена</button>
         </div>
     </div>
 
@@ -151,7 +161,7 @@
         <button class="tab-pill" onclick="switchTab('shop', this)">Магазин</button>
     </nav>
 
-    <!-- 1. ГЛАВНАЯ (С ВИДЖЕТОМ БЛИЖАЙШЕГО МАТЧА ПОД ПЛАШКАМИ) -->
+    <!-- 1. ГЛАВНАЯ -->
     <div id="screen-news" class="screen active">
         <div id="nextMatchWidgetContainer"></div>
         <div id="newsContainer"></div>
@@ -228,7 +238,7 @@
         </div>
     </div>
 
-    <!-- 4. МАГАЗИН И НАСТРОЙКИ ДИЗАЙНА/ФОНА -->
+    <!-- 4. МАГАЗИН И ДИЗАЙН -->
     <div id="screen-shop" class="screen">
         <div class="shop-grid" id="shopContainer"></div>
         <div class="chat-section" style="margin-top: 20px;"><div class="chat-header">💬 Отзывы</div><div class="chat-messages" id="chat-shop"></div>
@@ -278,19 +288,27 @@
             document.getElementById('socialModal').classList.toggle('active');
         }
 
-        function askAdmin() {
-            toggleSocialMenu();
-            setTimeout(() => {
-                let pass = prompt("Пароль Разработчика:");
-                if(pass === "71633") {
-                    isAdmin = true;
-                    document.body.classList.add('is-admin');
-                    alert("Режим Бога активирован.");
-                    renderAll();
-                } else if(pass !== null) {
-                    alert("Неверный пароль!");
-                }
-            }, 100);
+        function openPasswordModal() {
+            toggleSocialMenu(); // Закрываем меню соцсетей
+            document.getElementById('passwordModal').classList.add('active'); // Открываем окно пароля
+            document.getElementById('devPassInput').value = '';
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.remove('active');
+        }
+
+        function checkDevPassword() {
+            let pass = document.getElementById('devPassInput').value.trim();
+            if(pass === "71633") {
+                isAdmin = true;
+                document.body.classList.add('is-admin');
+                closePasswordModal();
+                alert("Режим Бога активирован.");
+                renderAll();
+            } else {
+                alert("Неверный пароль!");
+            }
         }
 
         const refs = ['news', 'matches', 'shop', 'players', 'chats', 'votes', 'social', 'nextMatch', 'design'];
@@ -309,7 +327,6 @@
         }
 
         function renderAll() {
-            // Дизайн и фон
             const des = localData.design || { color: "#ff5500", bg: "" };
             document.documentElement.style.setProperty('--primary', des.color);
             document.getElementById('glow1').style.background = des.color + '88';
@@ -321,7 +338,6 @@
             }
             if(document.getElementById('primaryColorInput')) document.getElementById('primaryColorInput').value = des.color;
 
-            // Виджет ближайшего матча под плашками на главной
             const nm = localData.nextMatch;
             const nmContainer = document.getElementById('nextMatchWidgetContainer');
             if(nm) {
@@ -341,7 +357,6 @@
                 nmContainer.innerHTML = '';
             }
 
-            // Соцсети
             const soc = localData.social || { tg: "#", max: "#" };
             document.getElementById('socialLinksContainer').innerHTML = `
                 <a href="${soc.tg}" target="_blank" class="social-link">Мы в Telegram</a>
@@ -352,7 +367,6 @@
                 document.getElementById('maxLinkInput').value = soc.max !== "#" ? soc.max : "";
             }
 
-            // Новости
             const newsArr = Object.entries(localData.news || {});
             document.getElementById('newsContainer').innerHTML = newsArr.map(([id, n]) => {
                 let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('news', '${id}')">✖</button>` : '';
@@ -372,21 +386,18 @@
                 return `<div class="glass-card">${delBtn}<div class="news-date">${n.date}</div><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div>${mediaHtml}</div>`;
             }).reverse().join('');
 
-            // Календарь
             document.getElementById('calendarContainer').innerHTML = Object.entries(localData.matches || {}).map(([id, m]) => {
                 let lo = m.logoO ? `<img src="${m.logoO}">` : '🛡️';
                 let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('matches', '${id}')">✖</button>` : '';
                 return `<div class="glass-card">${delBtn}<div class="match-header">${m.date}</div><div class="match-row"><div class="team-block"><div class="team-logo"><img src="1335.jpg"></div></div><div class="score-block"><div class="score-pill">${m.scoreF} : ${m.scoreO}</div><div class="match-time">${m.status}</div></div><div class="team-block"><div class="team-logo">${lo}</div><div class="team-name">${m.opponent}</div></div></div></div>`;
             }).reverse().join('');
 
-            // Магазин
             document.getElementById('shopContainer').innerHTML = Object.entries(localData.shop || {}).map(([id, s]) => {
                 let imgTag = s.img.startsWith('data:') ? `<img src="${s.img}" class="shop-img">` : `<div class="shop-img">${s.img}</div>`;
                 let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('shop', '${id}')">✖</button>` : '';
                 return `<div class="glass-card shop-item">${delBtn}${imgTag}<div class="shop-title">${s.name}</div><div class="shop-price">${s.price}</div></div>`;
             }).reverse().join('');
 
-            // Состав
             let field = document.getElementById('fieldContainer');
             let bench = document.getElementById('benchContainer');
             field.querySelectorAll('.player-card').forEach(c => c.remove());
@@ -417,7 +428,6 @@
             });
             document.getElementById('vote-player').innerHTML = voteSelectHtml;
 
-            // Чаты
             ['news', 'calendar', 'squad', 'shop'].forEach(room => {
                 const container = document.getElementById(`chat-${room}`);
                 if (!container || !localData.chats[room]) return;
