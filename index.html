@@ -48,11 +48,12 @@
         .nm-info { margin-top: 12px; font-size: 12px; color: var(--text-muted); text-align: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; }
 
         .glass-card { background: var(--glass-bg); backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 28px; padding: 20px; margin-bottom: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); position: relative; overflow: hidden; }
-        .featured-news { padding: 0; min-height: 240px; display: flex; flex-direction: column; justify-content: flex-end; background-size: cover; background-position: center; border: 1px solid var(--primary); }
-        .featured-overlay { background: linear-gradient(0deg, #000 0%, transparent 100%); padding: 25px 20px; border-radius: 0 0 28px 28px; width: 100%; }
+        
+        /* Новый стиль новостей */
+        .news-main-img { width: 100%; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--glass-border); object-fit: cover; max-height: 300px; display: block; }
         .news-date { font-size: 11px; color: var(--primary); font-weight: 800; text-transform: uppercase; margin-bottom: 6px; }
         .news-title { font-size: 20px; font-weight: 800; line-height: 1.2; margin-bottom: 8px; }
-        .news-text { font-size: 14px; color: #ccc; line-height: 1.4; margin-bottom: 10px; }
+        .news-text { font-size: 14px; color: #ccc; line-height: 1.4; margin-bottom: 10px; white-space: pre-line; }
         .news-video { width: 100%; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--glass-border); }
 
         .news-actions { display: flex; gap: 10px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; }
@@ -173,7 +174,7 @@
         <button type="button" class="tab-pill" onclick="switchTab('shop', this)">Магазин</button>
     </nav>
 
-    <!-- 1. ГЛАВНАЯ -->
+    <!-- 1. ГЛАВНАЯ (ЧАТ УДАЛЕН, ЛАЙКИ И КОММЕНТЫ В КАРТОЧКАХ) -->
     <div id="screen-news" class="screen active">
         <div id="nextMatchWidgetContainer"></div>
         <div id="newsContainer"></div>
@@ -270,10 +271,15 @@
             <input type="file" id="sImgFile" class="admin-input" accept="image/*">
             <button type="button" class="admin-btn-save" onclick="saveShop()">В магазин</button>
 
-            <h3 style="color:var(--primary); margin: 30px 0 10px;">🎨 Дизайн и праздничный фон</h3>
-            <label style="color:#aaa; font-size:12px; margin-bottom:5px; display:block;">Загрузить картинку фона:</label>
+            <h3 style="color:var(--primary); margin: 30px 0 10px;">🎨 Дизайн приложения</h3>
+            <label style="color:#aaa; font-size:12px; margin-bottom:5px; display:block;">Загрузить новую эмблему клуба (в шапку и календарь):</label>
+            <input type="file" id="logoImgFile" class="admin-input" accept="image/*">
+
+            <label style="color:#aaa; font-size:12px; margin-bottom:5px; margin-top:15px; display:block;">Загрузить картинку фона:</label>
             <input type="file" id="bgImgFile" class="admin-input" accept="image/*">
             <button type="button" class="admin-btn-save" style="background:#555; margin-bottom:15px;" onclick="clearBgImg()">Убрать картинку фона</button>
+            
+            <label style="color:#aaa; font-size:12px; margin-bottom:5px; display:block;">Основной цвет:</label>
             <input type="color" id="primaryColorInput" class="admin-input" style="height:50px; padding:5px;">
             <button type="button" class="admin-btn-save" onclick="saveDesignSettings()">Сохранить дизайн</button>
 
@@ -349,8 +355,15 @@
         }
 
         function likeNews(id) {
+            let likedArray = JSON.parse(localStorage.getItem('phx_liked_news') || '[]');
+            if(likedArray.includes(id)) {
+                alert("Вы уже оценили эту новость!");
+                return;
+            }
             let current = (localData.news[id] && localData.news[id].likes) ? localData.news[id].likes : 0;
             db.ref('news/' + id + '/likes').set(current + 1);
+            likedArray.push(id);
+            localStorage.setItem('phx_liked_news', JSON.stringify(likedArray));
         }
         
         function toggleNewsComments(id) {
@@ -368,22 +381,25 @@
         }
 
         function renderAll() {
-            const des = localData.design || { color: "#ff5500", bg: "" };
+            const des = localData.design || { color: "#ff5500", bg: "", logo: "" };
             document.documentElement.style.setProperty('--primary', des.color);
             document.getElementById('glow1').style.background = des.color + '88';
             document.getElementById('glow2').style.background = des.color + '88';
             document.body.style.backgroundImage = des.bg ? `url('${des.bg}')` : 'none';
+            document.getElementById('mainLogoElement').src = des.logo || '1335.jpg';
             if(document.getElementById('primaryColorInput')) document.getElementById('primaryColorInput').value = des.color;
 
             const nm = localData.nextMatch;
             const nmContainer = document.getElementById('nextMatchWidgetContainer');
             if(nm) {
                 let nmL = nm.logo ? `<img src="${nm.logo}">` : '🛡️';
+                let myLogo = des.logo ? `<img src="${des.logo}">` : `<img src="1335.jpg">`;
                 nmContainer.innerHTML = `
                     <div class="next-match-widget">
+                        <button type="button" class="delete-btn" style="${isAdmin?'display:flex;':''}" onclick="deleteItem('nextMatch', '')">✖</button>
                         <div class="next-match-title"><span>🔥 Ближайший матч</span><span>${formatDateReadable(nm.date)}</span></div>
                         <div class="next-match-teams">
-                            <div class="nm-team"><div class="nm-logo"><img src="1335.jpg"></div><span>Феникс</span></div>
+                            <div class="nm-team"><div class="nm-logo">${myLogo}</div><span>Феникс</span></div>
                             <div class="nm-vs">VS</div>
                             <div class="nm-team"><span>${nm.opponent}</span><div class="nm-logo">${nmL}</div></div>
                         </div>
@@ -392,12 +408,12 @@
                 `;
             } else { nmContainer.innerHTML = ''; }
 
-            const soc = localData.social || { tg: "#", max: "#" };
+            const soc = localData.social || { tg: "https://t.me/Phoenix_floorballteam", max: "https://max.ru/join/3NZROyrUf3vVG _ztCdQHrhGD8BGFym4kbaaW4ql_GNM" };
             document.getElementById('socialLinksContainer').innerHTML = `
                 <a href="${soc.tg}" target="_blank" class="social-link">Мы в Telegram</a>
                 <a href="${soc.max}" target="_blank" class="social-link">Мы в MAX</a>
             `;
-            if(document.getElementById('tgLinkInput')) { document.getElementById('tgLinkInput').value = soc.tg !== "#" ? soc.tg : ""; document.getElementById('maxLinkInput').value = soc.max !== "#" ? soc.max : ""; }
+            if(document.getElementById('tgLinkInput')) { document.getElementById('tgLinkInput').value = soc.tg; document.getElementById('maxLinkInput').value = soc.max; }
 
             const newsArr = Object.entries(localData.news || {});
             document.getElementById('newsContainer').innerHTML = newsArr.map(([id, n]) => {
@@ -438,10 +454,8 @@
                     </div>
                 `;
 
-                if(!n.video && n.img) {
-                    return `<div class="glass-card featured-news" style="background-image: url('${n.img}');">${delBtn}<div class="featured-overlay"><div class="news-date">${n.date}</div><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div>${interactionPanel}</div></div>`;
-                }
-                return `<div class="glass-card">${delBtn}<div class="news-date">${n.date}</div><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div>${mediaHtml}${interactionPanel}</div>`;
+                let imgHtml = n.img ? `<img src="${n.img}" class="news-main-img">` : '';
+                return `<div class="glass-card">${delBtn}${imgHtml}<div class="news-date">${n.date}</div><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div>${mediaHtml}${interactionPanel}</div>`;
             }).reverse().join('');
 
             let matchesArr = Object.entries(localData.matches || {});
@@ -455,9 +469,10 @@
                 } else if(m.type === 'event') {
                     return `<div class="glass-card" style="border-color: #00ffff;">${delBtn}<div class="match-header" style="color: #00ffff;">📌 Событие • ${formattedDate}</div><div style="text-align: center; font-size: 18px; font-weight: 800; padding: 10px 0;">${m.opponent}</div></div>`;
                 } else {
+                    let myLogo = des.logo ? `<img src="${des.logo}">` : `<img src="1335.jpg">`;
                     let lo = m.logoO ? `<img src="${m.logoO}">` : '🛡️';
                     let statusText = (m.scoreF !== "-" && m.scoreF !== undefined && m.scoreF !== "") ? "Завершен" : "Ожидается";
-                    return `<div class="glass-card">${delBtn}<div class="match-header">🏒 Матч • ${formattedDate}</div><div class="match-row"><div class="team-block"><div class="team-logo"><img src="1335.jpg"></div><div class="team-name">Феникс</div></div><div class="score-block"><div class="score-pill">${m.scoreF} : ${m.scoreO}</div><div class="match-time">${statusText}</div></div><div class="team-block"><div class="team-logo">${lo}</div><div class="team-name">${m.opponent}</div></div></div></div>`;
+                    return `<div class="glass-card">${delBtn}<div class="match-header">🏒 Матч • ${formattedDate}</div><div class="match-row"><div class="team-block"><div class="team-logo">${myLogo}</div><div class="team-name">Феникс</div></div><div class="score-block"><div class="score-pill">${m.scoreF} : ${m.scoreO}</div><div class="match-time">${statusText}</div></div><div class="team-block"><div class="team-logo">${lo}</div><div class="team-name">${m.opponent}</div></div></div></div>`;
                 }
             }).join('');
 
@@ -526,7 +541,8 @@
         }
 
         function deleteItem(path, id) {
-            if(confirm("Удалить навсегда?")) { db.ref(`${path}/${id}`).remove(); }
+            if(id === '') { db.ref(path).remove(); }
+            else if(confirm("Удалить навсегда?")) { db.ref(`${path}/${id}`).remove(); }
         }
 
         function processFilePromise(inputId) {
@@ -580,7 +596,7 @@
             let posNames = {"pos-c":"ЦН", "pos-lw":"ЛН", "pos-rw":"ПН", "pos-ld":"ЛЗ", "pos-rd":"ПЗ", "pos-gk":"ВР"};
             let imgData = await processFilePromise('pPhotoFile');
             let photo = imgData;
-            if(pos !== 'bench' && !photo && localData.players[pos]) photo = localData.players[pos].photo;
+            if(pos !== 'bench' && !photo && localData.players && localData.players[pos]) photo = localData.players[pos].photo;
             let playerData = { name: n, baseRating: parseInt(r), posName: (pos === 'bench' && customPos) ? customPos : posNames[pos], photo: photo || "" };
             if (pos === 'bench') { db.ref('players').push(playerData); } else { db.ref(`players/${pos}`).set(playerData); }
             document.querySelectorAll('#admin-squad input').forEach(i => i.value = '');
@@ -600,13 +616,18 @@
         async function saveDesignSettings() {
             let color = document.getElementById('primaryColorInput').value;
             let bgData = await processFilePromise('bgImgFile');
-            let currentBg = localData.design ? localData.design.bg : "";
-            db.ref('design').set({ color: color, bg: bgData || currentBg });
+            let logoData = await processFilePromise('logoImgFile');
+            
+            let currentBg = localData.design && localData.design.bg ? localData.design.bg : "";
+            let currentLogo = localData.design && localData.design.logo ? localData.design.logo : "";
+            
+            db.ref('design').set({ color: color, bg: bgData || currentBg, logo: logoData || currentLogo });
             alert("Настройки дизайна сохранены!");
         }
 
         function clearBgImg() {
-            db.ref('design').set({ color: document.getElementById('primaryColorInput').value, bg: "" });
+            let currentLogo = localData.design && localData.design.logo ? localData.design.logo : "";
+            db.ref('design').set({ color: document.getElementById('primaryColorInput').value, bg: "", logo: currentLogo });
             alert("Фоновая картинка удалена!");
         }
     </script>
