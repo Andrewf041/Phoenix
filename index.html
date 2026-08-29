@@ -55,7 +55,6 @@
         .news-text { font-size: 14px; color: #ccc; line-height: 1.4; margin-bottom: 10px; }
         .news-video { width: 100%; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--glass-border); }
 
-        /* Лайки и комменты в новостях */
         .news-actions { display: flex; gap: 10px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; }
         .na-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #fff; padding: 6px 14px; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; }
         .news-comments-section { margin-top: 12px; background: rgba(0,0,0,0.3); border-radius: 16px; padding: 12px; }
@@ -150,14 +149,14 @@
         </div>
     </div>
 
-    <!-- Надежное окно ввода пароля с кнопками button -->
+    <!-- Надежное окно ввода пароля с формой -->
     <div class="social-dropdown" id="passwordModal" onclick="if(event.target === this) closePasswordModal()">
-        <div class="social-box">
+        <form class="social-box" onsubmit="event.preventDefault(); checkDevPassword();">
             <div class="social-title">🔒 Вход для разработчика</div>
-            <input type="password" id="devPassInput" class="admin-input" placeholder="Пароль" style="text-align: center;">
-            <button type="button" class="admin-btn-save" onclick="checkDevPassword()">Войти</button>
+            <input type="password" id="devPassInput" class="admin-input" placeholder="Пароль" style="text-align: center;" autocomplete="off">
+            <button type="submit" class="admin-btn-save">Войти</button>
             <button type="button" class="dev-trigger" onclick="closePasswordModal()" style="margin-top:15px; width:100%;">Отмена</button>
-        </div>
+        </form>
     </div>
 
     <div class="ambient-glow glow-1" id="glow1"></div>
@@ -174,7 +173,7 @@
         <button type="button" class="tab-pill" onclick="switchTab('shop', this)">Магазин</button>
     </nav>
 
-    <!-- 1. ГЛАВНАЯ (ЧАТ УДАЛЕН, ЛАЙКИ И КОММЕНТЫ В КАРТОЧКАХ) -->
+    <!-- 1. ГЛАВНАЯ -->
     <div id="screen-news" class="screen active">
         <div id="nextMatchWidgetContainer"></div>
         <div id="newsContainer"></div>
@@ -211,7 +210,7 @@
                 <option value="BD">🎂 День рождения</option>
                 <option value="event">📌 Другое событие</option>
             </select>
-            <input type="text" id="mOpponent" class="admin-input" placeholder="Название события / Соперник (напр. День рождения Ивана или Барсы)">
+            <input type="text" id="mOpponent" class="admin-input" placeholder="Название события / Соперник">
             <input type="date" id="mDateRaw" class="admin-input">
             <div class="input-row">
                 <input type="number" id="mScoreF" class="admin-input" placeholder="Счет Мы (если матч)">
@@ -286,11 +285,10 @@
     </div>
 
     <script>
-        // === ВСТАВЬ ТВОЮ ССЫЛКУ ВОТ СЮДА В СТРОКУ databaseURL ===
         const firebaseConfig = {
             apiKey: "AIzaSyDsxGKTwHzLPwep_7EYiHHKAxsBwbJ-uEM",
             authDomain: "phoenix-9adab.firebaseapp.com",
-            databaseURL: "https://console.firebase.google.com/project/phoenix-9adab/database/phoenix-9adab-default-rtdb/data/~2F", // <--- ОБЯЗАТЕЛЬНО ЗАМЕНИТЬ НА СВОЮ ССЫЛКУ ИЗ FIREBASE
+            databaseURL: "https://phoenix-9adab-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "phoenix-9adab",
             storageBucket: "phoenix-9adab.firebasestorage.app",
             messagingSenderId: "935773473607",
@@ -302,7 +300,7 @@
         let isAdmin = false;
         let localData = { news: {}, matches: {}, shop: {}, players: {}, chats: { calendar: {}, squad: {}, shop: {} }, votes: {}, social: { tg: "#", max: "#" }, nextMatch: null, design: { color: "#ff5500", bg: "" } };
         const fanNames = ["Болельщик", "Фанат", "Ультрас", "PhoenixFan", "Игрок"];
-        let openNewsComments = {}; // Для хранения открытых вкладок с комментариями
+        let openNewsComments = {}; 
 
         function toggleSocialMenu() { document.getElementById('socialModal').classList.toggle('active'); }
 
@@ -350,22 +348,20 @@
             return `${parseInt(parts[2])} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
         }
 
-        // Функции для лайков и комментов новостей
         function likeNews(id) {
             let current = (localData.news[id] && localData.news[id].likes) ? localData.news[id].likes : 0;
             db.ref('news/' + id + '/likes').set(current + 1);
         }
+        
         function toggleNewsComments(id) {
             openNewsComments[id] = !openNewsComments[id];
             renderAll();
         }
+        
         function sendNewsComment(id) {
             let input = document.getElementById('nc-input-' + id);
             if(input && input.value.trim()) {
-                db.ref('news/' + id + '/comments').push({
-                    name: fanNames[Math.floor(Math.random() * fanNames.length)] + Math.floor(Math.random() * 99),
-                    text: input.value.trim()
-                });
+                db.ref('news/' + id + '/comments').push({ name: fanNames[Math.floor(Math.random() * fanNames.length)] + Math.floor(Math.random() * 99), text: input.value.trim() });
                 input.value = '';
                 openNewsComments[id] = true;
             }
@@ -403,7 +399,6 @@
             `;
             if(document.getElementById('tgLinkInput')) { document.getElementById('tgLinkInput').value = soc.tg !== "#" ? soc.tg : ""; document.getElementById('maxLinkInput').value = soc.max !== "#" ? soc.max : ""; }
 
-            // Отрисовка Новостей с лайками и комментами
             const newsArr = Object.entries(localData.news || {});
             document.getElementById('newsContainer').innerHTML = newsArr.map(([id, n]) => {
                 let delBtn = isAdmin ? `<button type="button" class="delete-btn" onclick="deleteItem('news', '${id}')">✖</button>` : '';
@@ -449,7 +444,6 @@
                 return `<div class="glass-card">${delBtn}<div class="news-date">${n.date}</div><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div>${mediaHtml}${interactionPanel}</div>`;
             }).reverse().join('');
 
-            // Отрисовка Умного Календаря
             let matchesArr = Object.entries(localData.matches || {});
             matchesArr.sort((a, b) => new Date(a[1].date || '1970-01-01') - new Date(b[1].date || '1970-01-01'));
             document.getElementById('calendarContainer').innerHTML = matchesArr.map(([id, m]) => {
