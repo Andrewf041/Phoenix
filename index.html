@@ -16,7 +16,7 @@
         .glow-1 { top: -100px; left: -100px; } .glow-2 { bottom: 10%; right: -150px; opacity: 0.2; }
 
         .header { display: flex; justify-content: center; align-items: center; padding: 15px 20px 10px; position: sticky; top: 0; z-index: 100; background: linear-gradient(180deg, rgba(5,3,1,0.98) 0%, rgba(5,3,1,0) 100%); height: 95px; }
-        .logo-img-main { height: 80px; width: auto; max-width: 200px; object-fit: contain; filter: drop-shadow(0 0 15px var(--primary-glow)); user-select: none; -webkit-user-select: none; cursor: pointer; }
+        .logo-img-main { height: 80px; width: auto; max-width: 200px; object-fit: contain; filter: drop-shadow(0 0 15px var(--primary-glow)); user-select: none; -webkit-user-select: none; }
         
         .top-nav { display: flex; gap: 12px; overflow-x: auto; padding: 10px 20px 20px; scrollbar-width: none; z-index: 99; position: relative; }
         .top-nav::-webkit-scrollbar { display: none; }
@@ -88,7 +88,6 @@
         .vote-input { flex-grow: 1; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid var(--glass-border); padding: 14px; border-radius: 16px; text-align: center; width: 80px; }
         .vote-btn { background: var(--primary); color: #fff; border: none; padding: 14px; border-radius: 16px; font-weight: 800; cursor: pointer; width:100%; margin-top:10px; }
 
-        /* ЭЛЕМЕНТЫ АДМИНА */
         .admin-controls { display: none; margin-top: 30px; border-top: 2px dashed var(--primary); padding-top: 20px; }
         .is-admin .admin-controls { display: block; }
         
@@ -105,12 +104,15 @@
 </head>
 <body>
 
+    <!-- Секретная зона для входа администратора -->
+    <div onclick="askAdmin()" style="position: fixed; top: 0; right: 0; width: 60px; height: 80px; z-index: 9999; cursor: pointer;"></div>
+
     <div class="ambient-glow glow-1" id="glow1"></div>
     <div class="ambient-glow glow-2" id="glow2"></div>
 
     <header class="header">
         <img id="mainLogoElement" src="1335.jpg" alt="ФЕНИКС" class="logo-img-main" onerror="this.src='https://ui-avatars.com/api/?name=PH&background=ff5500&color=fff'">
-        <div id="fallbackLogo" class="fallback-logo" style="display:none; cursor:pointer;">🦅 ФЕНИКС</div>
+        <div id="fallbackLogo" class="fallback-logo" style="display:none;">🦅 ФЕНИКС</div>
     </header>
 
     <nav class="top-nav">
@@ -202,11 +204,10 @@
     </div>
 
     <script>
-        // === ВСТАВЬ ТВОЮ ССЫЛКУ ВОТ СЮДА В СТРОКУ databaseURL ===
         const firebaseConfig = {
             apiKey: "AIzaSyDsxGKTwHzLPwep_7EYiHHKAxsBwbJ-uEM",
             authDomain: "phoenix-9adab.firebaseapp.com",
-            databaseURL: "https://console.firebase.google.com/project/phoenix-9adab/database/phoenix-9adab-default-rtdb/data/~2F", // <--- ОБЯЗАТЕЛЬНО ЗАМЕНИТЬ
+            databaseURL: "https://console.firebase.google.com/project/phoenix-9adab/database/phoenix-9adab-default-rtdb/data/~2F",
             projectId: "phoenix-9adab",
             storageBucket: "phoenix-9adab.firebasestorage.app",
             messagingSenderId: "935773473607",
@@ -219,26 +220,8 @@
         let localData = { news: {}, matches: {}, shop: {}, players: {}, chats: { news: {}, calendar: {}, squad: {}, shop: {} }, votes: {} };
         const fanNames = ["Болельщик", "Фанат", "Ультрас", "PhoenixFan"];
 
-        // === НОВЫЙ ВХОД ДЛЯ АДМИНА: 3 БЫСТРЫХ НАЖАТИЯ ===
-        let adminClickCount = 0;
-        let adminClickTimer;
-
-        function handleAdminTap() {
-            adminClickCount++;
-            clearTimeout(adminClickTimer);
-            if(adminClickCount >= 3) {
-                adminClickCount = 0;
-                askAdmin();
-            } else {
-                adminClickTimer = setTimeout(() => { adminClickCount = 0; }, 1000);
-            }
-        }
-
-        document.getElementById('mainLogoElement').addEventListener('click', handleAdminTap);
-        document.getElementById('fallbackLogo').addEventListener('click', handleAdminTap);
-
         function askAdmin() {
-            if(!isAdmin && prompt("Пароль Разработчика:") === "1234") {
+            if(!isAdmin && prompt("Пароль Разработчика:") === "71633") {
                 isAdmin = true;
                 document.body.classList.add('is-admin');
                 alert("Режим Бога активирован.");
@@ -262,7 +245,6 @@
         }
 
         function renderAll() {
-            // Новости (Добавлена поддержка видео по ссылке)
             const newsArr = Object.entries(localData.news);
             document.getElementById('newsContainer').innerHTML = newsArr.map(([id, n]) => {
                 let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('news', '${id}')">✖</button>` : '';
@@ -283,21 +265,18 @@
                 return `<div class="glass-card">${delBtn}<div class="news-date">${n.date}</div><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div>${mediaHtml}</div>`;
             }).reverse().join('');
 
-            // Матчи
             document.getElementById('calendarContainer').innerHTML = Object.entries(localData.matches).map(([id, m]) => {
                 let lo = m.logoO ? `<img src="${m.logoO}">` : '🛡️';
                 let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('matches', '${id}')">✖</button>` : '';
                 return `<div class="glass-card">${delBtn}<div class="match-header">${m.date}</div><div class="match-row"><div class="team-block"><div class="team-logo"><img src="1335.jpg"></div></div><div class="score-block"><div class="score-pill">${m.scoreF} : ${m.scoreO}</div><div class="match-time">${m.status}</div></div><div class="team-block"><div class="team-logo">${lo}</div><div class="team-name">${m.opponent}</div></div></div></div>`;
             }).reverse().join('');
 
-            // Магазин
             document.getElementById('shopContainer').innerHTML = Object.entries(localData.shop).map(([id, s]) => {
                 let imgTag = s.img.startsWith('data:') ? `<img src="${s.img}" class="shop-img">` : `<div class="shop-img">${s.img}</div>`;
                 let delBtn = isAdmin ? `<button class="delete-btn" onclick="deleteItem('shop', '${id}')">✖</button>` : '';
                 return `<div class="glass-card shop-item">${delBtn}${imgTag}<div class="shop-title">${s.name}</div><div class="shop-price">${s.price}</div></div>`;
             }).reverse().join('');
 
-            // Игроки (Разделение на Поле и Скамейку)
             let field = document.getElementById('fieldContainer');
             let bench = document.getElementById('benchContainer');
             field.querySelectorAll('.player-card').forEach(c => c.remove());
@@ -328,7 +307,6 @@
             });
             document.getElementById('vote-player').innerHTML = voteSelectHtml;
 
-            // Чаты
             ['news', 'calendar', 'squad', 'shop'].forEach(room => {
                 const container = document.getElementById(`chat-${room}`);
                 if (!container || !localData.chats[room]) return;
