@@ -3,34 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ПХК Феникс - Приложение</title>
+    <title>ПХК Феникс</title>
     <style>
-        /* Современные переменные цветов */
         :root {
-            --bg-main: #0d0f12; /* Глубокий темный фон */
-            --bg-card: #1a1d24; /* Фон панелей */
-            --accent: #ff6600; /* Фирменный оранжевый Феникса */
+            --bg-main: #0d0f12;
+            --bg-card: #1a1d24;
+            --accent: #ff6600;
             --accent-glow: rgba(255, 102, 0, 0.4);
             --text-main: #ffffff;
             --text-muted: #8a8d98;
-            --field-bg: #cda375; /* Цвет благородного паркета */
+            --field-bg: #cda375;
         }
 
         * {
             box-sizing: border-box;
-            font-family: 'Segoe UI', -apple-system, Roboto, sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: var(--bg-main);
             color: var(--text-main);
-            padding-bottom: 80px; /* Отступ под меню */
+            padding-bottom: 90px;
         }
 
-        /* --- ШАПКА ПРИЛОЖЕНИЯ --- */
         .header {
             display: flex;
             justify-content: space-between;
@@ -38,7 +35,6 @@
             padding: 15px 20px;
             background: var(--bg-card);
             border-bottom: 2px solid var(--accent);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -55,46 +51,25 @@
             width: 40px;
             border-radius: 50%;
             object-fit: cover;
-            /* Свечение вокруг логотипа */
-            box-shadow: 0 0 10px var(--accent-glow);
+            border: 2px solid var(--accent);
         }
 
         .header-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            background: linear-gradient(90deg, #ff6600, #ff9900);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--accent);
         }
 
-        .admin-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 22px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .admin-btn:hover { color: var(--accent); }
-
-        /* --- СИСТЕМА ЭКРАНОВ (ВКЛАДКИ) --- */
+        /* Экраны */
         .screen {
-            display: none; /* Скрываем все экраны по умолчанию */
+            display: none;
             padding: 20px;
-            animation: fadeIn 0.4s ease-out;
         }
         .screen.active {
-            display: block; /* Показываем активный */
+            display: block;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- ЗАГОЛОВКИ ЭКРАНОВ --- */
         .section-title {
             font-size: 22px;
             font-weight: 700;
@@ -106,27 +81,17 @@
             margin-bottom: 20px;
         }
 
-        /* --- ФЛОРБОЛЬНОЕ ПОЛЕ --- */
+        /* Флорбольное поле */
         .field {
             background: var(--field-bg);
-            border: 4px solid rgba(255, 255, 255, 0.9);
+            border: 4px solid #fff;
             border-radius: 12px;
             height: 480px;
             position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
             overflow: hidden;
         }
 
-        /* Текстура дерева на поле */
-        .field::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image: repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(0,0,0,0.03) 20px, rgba(0,0,0,0.03) 40px);
-            pointer-events: none;
-        }
-
-        /* Разметка площадки */
         .line-center {
             position: absolute;
             top: 50%; left: 0; right: 0;
@@ -152,7 +117,7 @@
         .goal-top { top: 0; border-top: none; border-radius: 0 0 25px 25px; }
         .goal-bottom { bottom: 0; border-bottom: none; border-radius: 25px 25px 0 0; }
 
-        /* --- КАРТОЧКА ИГРОКА (FIFA STYLE) --- */
+        /* Карточка игрока */
         .player-card {
             width: 75px;
             height: 110px;
@@ -165,29 +130,19 @@
             flex-direction: column;
             align-items: center;
             padding: 4px;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.5), inset 0 0 10px var(--accent-glow);
-            transition: 0.2s;
-            cursor: pointer;
-        }
-
-        .player-card:hover {
-            transform: translate(-50%, -55%) scale(1.05);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.7), 0 0 15px var(--accent-glow);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.5);
         }
 
         .card-rating {
             font-size: 20px;
             font-weight: 900;
             color: #fff;
-            text-shadow: 0 0 8px var(--accent);
-            line-height: 1;
         }
 
         .card-pos {
             font-size: 10px;
             font-weight: 700;
             color: var(--accent);
-            text-transform: uppercase;
         }
 
         .card-photo {
@@ -196,8 +151,6 @@
             background: #444;
             border-radius: 50%;
             margin: 4px 0;
-            border: 1px solid rgba(255,255,255,0.2);
-            /* Если есть фото, оно будет здесь */
             background-image: url('https://ui-avatars.com/api/?name=Player&background=random&color=fff');
             background-size: cover;
         }
@@ -205,17 +158,10 @@
         .card-name {
             font-size: 11px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
             color: #ddd;
-            width: 100%;
             text-align: center;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
 
-        /* Позиции на поле */
         .pos-c { top: 22%; left: 50%; }
         .pos-lw { top: 38%; left: 22%; }
         .pos-rw { top: 38%; left: 78%; }
@@ -223,17 +169,24 @@
         .pos-rd { top: 68%; left: 72%; }
         .pos-gk { top: 88%; left: 50%; }
 
-        /* --- НИЖНЕЕ МЕНЮ (NAVBAR) --- */
+        .placeholder-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent);
+        }
+
+        /* Нижнее меню */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             width: 100%;
-            background: rgba(26, 29, 36, 0.95);
-            backdrop-filter: blur(10px);
+            background: #1a1d24;
             display: flex;
             justify-content: space-around;
-            padding: 10px 0 15px 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px 0;
+            border-top: 1px solid #333;
             z-index: 1000;
         }
 
@@ -245,72 +198,55 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
-            transition: 0.3s;
+            gap: 4px;
             cursor: pointer;
-            width: 25%;
+            background: none;
+            border: none;
         }
 
         .nav-icon {
-            font-size: 22px;
-            transition: 0.3s;
+            font-size: 20px;
         }
 
-        /* Активное состояние кнопки */
         .nav-item.active {
             color: var(--accent);
-        }
-        .nav-item.active .nav-icon {
-            transform: translateY(-4px);
-            text-shadow: 0 0 15px var(--accent-glow);
-        }
-
-        /* --- ЗАГЛУШКИ ДЛЯ ДРУГИХ ЭКРАНОВ --- */
-        .placeholder-card {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--accent);
         }
     </style>
 </head>
 <body>
 
-    <!-- Шапка приложения -->
     <header class="header">
         <div class="header-logo-container">
-            <!-- Здесь будет твой логотип. Файл 1094.jpg должен лежать в репозитории -->
-            <img src="1094.jpg" alt="Логотип" class="logo-img" onerror="this.src='https://ui-avatars.com/api/?name=PH&background=ff6600&color=fff'">
-            <h1 class="header-title">Феникс</h1>
+            <img src="1094.jpg" alt="Logo" class="logo-img" onerror="this.src='https://ui-avatars.com/api/?name=PH&background=ff6600&color=fff'">
+            <h1 class="header-title">Феникс v2.0</h1>
         </div>
-        <button class="admin-btn">⚙️</button>
+        <div style="color: var(--accent); font-size: 20px;">⚙️</div>
     </header>
 
-    <!-- ЭКРАН 1: ГЛАВНАЯ (Пока скрыт) -->
+    <!-- Главная -->
     <div id="screen-home" class="screen">
         <h2 class="section-title">Главная</h2>
-        <p class="section-subtitle">Сводка и последние результаты</p>
+        <p class="section-subtitle">Добро пожаловать в приложение команды!</p>
         <div class="placeholder-card">
-            <h3>Последний матч</h3>
-            <p style="color: #888; margin-top: 5px;">Феникс 5 : 3 Спарта</p>
+            <h3>Последняя игра</h3>
+            <p style="color: #aaa; margin-top: 5px;">Феникс 6 : 2 Легенда</p>
         </div>
     </div>
 
-    <!-- ЭКРАН 2: КАЛЕНДАРЬ (Пока скрыт) -->
+    <!-- Календарь -->
     <div id="screen-calendar" class="screen">
         <h2 class="section-title">Календарь игр</h2>
-        <p class="section-subtitle">Предстоящие матчи сезона</p>
+        <p class="section-subtitle">Расписание матчей сезона</p>
         <div class="placeholder-card">
-            <h3>vs. Динамо</h3>
-            <p style="color: #ff6600; margin-top: 5px;">15 Октября • 18:00 • Домашняя арена</p>
+            <h3>Следующий матч</h3>
+            <p style="color: var(--accent); margin-top: 5px;">Феникс vs Титан • 20 октября</p>
         </div>
     </div>
 
-    <!-- ЭКРАН 3: СОСТАВ (Открыт по умолчанию) -->
+    <!-- Состав (Активен по умолчанию) -->
     <div id="screen-squad" class="screen active">
         <h2 class="section-title">Fan Lineup</h2>
-        <p class="section-subtitle">Собери топ-состав. Жми на карточку для замены.</p>
+        <p class="section-subtitle">Состав по оценкам болельщиков</p>
 
         <div class="field">
             <div class="line-center"></div>
@@ -318,42 +254,36 @@
             <div class="goal-area goal-top"></div>
             <div class="goal-area goal-bottom"></div>
 
-            <!-- Игроки -->
             <div class="player-card pos-c">
                 <div class="card-rating">88</div>
                 <div class="card-pos">ЦН</div>
                 <div class="card-photo"></div>
                 <div class="card-name">Петров</div>
             </div>
-            
             <div class="player-card pos-lw">
                 <div class="card-rating">85</div>
                 <div class="card-pos">ЛН</div>
                 <div class="card-photo"></div>
                 <div class="card-name">Сидоров</div>
             </div>
-            
             <div class="player-card pos-rw">
                 <div class="card-rating">82</div>
                 <div class="card-pos">ПН</div>
                 <div class="card-photo"></div>
                 <div class="card-name">Иванов</div>
             </div>
-
             <div class="player-card pos-ld">
                 <div class="card-rating">86</div>
                 <div class="card-pos">ЛЗ</div>
                 <div class="card-photo"></div>
                 <div class="card-name">Смирнов</div>
             </div>
-
             <div class="player-card pos-rd">
                 <div class="card-rating">81</div>
                 <div class="card-pos">ПЗ</div>
                 <div class="card-photo"></div>
                 <div class="card-name">Соколов</div>
             </div>
-
             <div class="player-card pos-gk">
                 <div class="card-rating">89</div>
                 <div class="card-pos">ВР</div>
@@ -363,57 +293,59 @@
         </div>
     </div>
 
-    <!-- ЭКРАН 4: НОВОСТИ (Пока скрыт) -->
+    <!-- Новости -->
     <div id="screen-news" class="screen">
         <h2 class="section-title">Новости</h2>
-        <p class="section-subtitle">Жизнь команды</p>
+        <p class="section-subtitle">Важные события клуба</p>
         <div class="placeholder-card">
-            <h3>Открыта продажа мерча!</h3>
-            <p style="color: #888; font-size: 12px; margin-top: 5px;">Заходи в раздел магазин, чтобы купить джерси...</p>
+            <h3>Новая форма</h3>
+            <p style="color: #aaa; margin-top: 5px;">Представлены комплекты домашней формы...</p>
         </div>
     </div>
 
-    <!-- Навигация (JS будет переключать экраны по клику) -->
+    <!-- Нижнее меню с кнопками -->
     <nav class="bottom-nav">
-        <div class="nav-item" onclick="switchTab('home', this)">
+        <button class="nav-item" onclick="switchTab('home', this)">
             <span class="nav-icon">🏠</span>
             <span>Главная</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('calendar', this)">
+        </button>
+        <button class="nav-item" onclick="switchTab('calendar', this)">
             <span class="nav-icon">📅</span>
             <span>Календарь</span>
-        </div>
-        <div class="nav-item active" onclick="switchTab('squad', this)">
+        </button>
+        <button class="nav-item active" onclick="switchTab('squad', this)">
             <span class="nav-icon">👕</span>
             <span>Состав</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('news', this)">
+        </button>
+        <button class="nav-item" onclick="switchTab('news', this)">
             <span class="nav-icon">📰</span>
             <span>Новости</span>
-        </div>
+        </button>
     </nav>
 
-    <!-- Скрипт для работы кнопок -->
     <script>
         function switchTab(tabId, clickedElement) {
-            // 1. Убираем класс 'active' у всех экранов и скрываем их
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
+            // Скрываем все экраны
+            var screens = document.querySelectorAll('.screen');
+            for (var i = 0; i < screens.length; i++) {
+                screens[i].classList.remove('active');
+            }
             
-            // 2. Показываем нужный экран
+            // Показываем нужный экран
             document.getElementById('screen-' + tabId).classList.add('active');
 
-            // 3. Убираем класс 'active' у всех кнопок в меню
-            document.querySelectorAll('.nav-item').forEach(nav => {
-                nav.classList.remove('active');
-            });
+            // Убираем подсветку с кнопок
+            var navItems = document.querySelectorAll('.nav-item');
+            for (var j = 0; j < navItems.length; j++) {
+                navItems[j].classList.remove('active');
+            }
 
-            // 4. Делаем нажатую кнопку активной (чтобы она загорелась оранжевым)
+            // Подсвечиваем нажатую кнопку
             clickedElement.classList.add('active');
         }
     </script>
 
 </body>
 </html>
+
 
