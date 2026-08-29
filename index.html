@@ -23,11 +23,13 @@
         .glow-1 { top: -100px; left: -100px; }
         .glow-2 { bottom: 10%; right: -150px; opacity: 0.2; }
 
+        /* Шапка */
         .header { display: flex; justify-content: center; align-items: center; padding: 15px 20px 10px; position: sticky; top: 0; z-index: 100; background: linear-gradient(180deg, rgba(5,3,1,0.98) 0%, rgba(5,3,1,0) 100%); height: 95px; }
-        .logo-img-main { height: 80px; width: auto; object-fit: contain; filter: drop-shadow(0 0 15px var(--primary-glow)); }
+        .logo-img-main { height: 80px; width: auto; max-width: 200px; object-fit: contain; filter: drop-shadow(0 0 15px var(--primary-glow)); }
         .fallback-logo { font-size: 26px; font-weight: 900; color: #fff; text-shadow: 0 0 15px var(--primary-glow); letter-spacing: 2px; align-items: center; display: none; }
         .admin-btn-header { position: absolute; right: 20px; top: 25px; height: 40px; width: 40px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); font-size: 18px; cursor: pointer; color: #fff; transition: 0.3s; }
 
+        /* Навигация */
         .top-nav { display: flex; gap: 12px; overflow-x: auto; padding: 10px 20px 20px; scrollbar-width: none; z-index: 99; position: relative; }
         .top-nav::-webkit-scrollbar { display: none; }
         .tab-pill { background: var(--glass-bg); color: var(--text-muted); border: 1px solid var(--glass-border); padding: 10px 22px; border-radius: 30px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: 0.3s; backdrop-filter: blur(10px); }
@@ -37,15 +39,17 @@
         .screen.active { display: block; }
         @keyframes scaleIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Карточки */
         .glass-card { background: var(--glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 28px; padding: 20px; margin-bottom: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); position: relative; overflow: hidden; }
 
-        /* Новости, Календарь, Магазин - без изменений стилей, они уже идеальны */
+        /* Новости */
         .featured-news { padding: 0; min-height: 240px; display: flex; flex-direction: column; justify-content: flex-end; background-size: cover; background-position: center; border: 1px solid var(--primary); }
         .featured-overlay { background: linear-gradient(0deg, #000 0%, transparent 100%); padding: 25px 20px; border-radius: 0 0 28px 28px; }
         .news-date { font-size: 11px; color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
         .news-title { font-size: 20px; font-weight: 800; line-height: 1.2; margin-bottom: 8px; }
         .news-text { font-size: 14px; color: #ccc; line-height: 1.4; }
 
+        /* Календарь */
         .match-header { font-size: 12px; color: var(--text-muted); text-align: center; margin-bottom: 15px; font-weight: 700; text-transform: uppercase; }
         .match-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .team-block { display: flex; flex-direction: column; align-items: center; width: 30%; }
@@ -56,9 +60,10 @@
         .score-pill { background: rgba(0,0,0,0.6); border: 1px solid var(--primary); border-radius: 20px; padding: 8px 24px; font-size: 26px; font-weight: 900; box-shadow: 0 0 20px var(--primary-glow); margin-bottom: 6px; }
         .match-time { font-size: 12px; color: var(--primary); font-weight: 700; }
 
+        /* Магазин */
         .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .shop-item { padding: 15px; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .shop-img { width: 80px; height: 80px; margin-bottom: 12px; object-fit: contain; font-size: 55px; line-height: 80px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); }
+        .shop-img { width: 80px; height: 80px; margin-bottom: 12px; object-fit: contain; font-size: 55px; line-height: 80px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); border-radius: 16px; }
         .shop-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; color: #eee; }
         .shop-price { font-size: 17px; font-weight: 900; color: var(--primary); }
 
@@ -69,6 +74,7 @@
         .goal-area { position: absolute; left: 50%; width: 140px; height: 45px; border: 2px solid rgba(255,255,255,0.15); transform: translateX(-50%); }
         .goal-top { top: -2px; border-top: none; border-radius: 0 0 25px 25px; }
         .goal-bottom { bottom: -2px; border-bottom: none; border-radius: 25px 25px 0 0; }
+        
         .player-card { width: 72px; height: 110px; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border: 1px solid var(--primary); border-radius: 12px; position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; padding: 6px 4px; box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
         .card-rating { font-size: 19px; font-weight: 900; color: #fff; line-height: 1; text-shadow: 0 0 10px var(--primary-glow); }
         .card-pos { font-size: 10px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
@@ -76,12 +82,12 @@
         .card-name { font-size: 10px; font-weight: 700; color: #eee; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
         .pos-c { top: 22%; left: 50%; } .pos-lw { top: 38%; left: 22%; } .pos-rw { top: 38%; left: 78%; } .pos-ld { top: 68%; left: 28%; } .pos-rd { top: 68%; left: 72%; } .pos-gk { top: 88%; left: 50%; }
 
-        /* === НОВЫЕ СТИЛИ ЧАТА === */
+        /* Чаты */
         .chat-section { background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); border-radius: 28px; padding: 20px; backdrop-filter: blur(15px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-top: 10px; }
         .chat-header { font-size: 16px; font-weight: 800; margin-bottom: 15px; color: var(--primary); display: flex; align-items: center; gap: 8px; }
         .chat-messages { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; padding-right: 5px; }
         .msg { display: flex; gap: 12px; align-items: flex-end; }
-        .msg-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #aa3300); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(255,85,0,0.3); }
+        .msg-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #aa3300); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(255,85,0,0.3); color:#fff; }
         .msg-content { background: rgba(255,255,255,0.06); padding: 12px 16px; border-radius: 20px 20px 20px 0; border: 1px solid rgba(255,255,255,0.05); max-width: 85%; }
         .msg-name { font-size: 11px; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; }
         .msg-text { font-size: 14px; color: #fff; line-height: 1.3; }
@@ -89,14 +95,14 @@
         .chat-input { flex-grow: 1; background: transparent; border: none; color: #fff; padding: 10px 15px; font-size: 14px; outline: none; }
         .chat-send { background: var(--primary); border: none; width: 40px; height: 40px; border-radius: 50%; color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 15px var(--primary-glow); }
 
-        /* === БЛОК ГОЛОСОВАНИЯ === */
+        /* Голосование */
         .vote-section { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
         .vote-row { display: flex; gap: 10px; }
         .vote-select { flex-grow: 2; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid var(--glass-border); padding: 14px; border-radius: 16px; outline: none; }
         .vote-input { flex-grow: 1; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid var(--glass-border); padding: 14px; border-radius: 16px; text-align: center; outline: none; width: 80px; }
         .vote-btn { background: var(--primary); color: #fff; border: none; padding: 14px; border-radius: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 5px 15px var(--primary-glow); }
 
-        /* Админка (скрыта для экономии места, стили те же) */
+        /* Админка и файлы */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; padding: 15px; backdrop-filter: blur(20px); }
         .modal-overlay.active { display: flex; animation: scaleIn 0.2s; }
         .modal-content { background: linear-gradient(145deg, #1a1c23 0%, #111216 100%); width: 100%; max-width: 420px; border-radius: 32px; padding: 25px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 50px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto; }
@@ -107,7 +113,14 @@
         .admin-tab { background: #000; border: 1px solid #333; color: #888; padding: 12px 16px; border-radius: 14px; white-space: nowrap; cursor: pointer; font-weight: 700; font-size: 13px; }
         .admin-tab.active { background: rgba(255,85,0,0.15); color: var(--primary); border-color: var(--primary); }
         .admin-input { width: 100%; padding: 16px; background: #08090b; color: #fff; border: 1px solid #2a2d35; border-radius: 16px; margin-bottom: 15px; font-size: 14px; }
-        .admin-btn-save { background: var(--primary); color: #fff; border: none; padding: 18px; border-radius: 16px; font-weight: 800; width: 100%; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .input-row { display: flex; gap: 10px; }
+        
+        input[type="file"] { padding: 12px; background: #08090b; color: #888; font-size: 12px; }
+        input[type="file"]::-webkit-file-upload-button { background: var(--primary); color: white; border: none; padding: 8px 14px; border-radius: 10px; cursor: pointer; margin-right: 12px; font-weight: bold; }
+        .file-label { color: var(--text-muted); font-size: 12px; margin-bottom: 6px; display: block; padding-left: 5px; font-weight: 600; }
+
+        .admin-btn-save { background: var(--primary); color: #fff; border: none; padding: 18px; border-radius: 16px; font-weight: 800; width: 100%; cursor: pointer; font-size: 16px; margin-top: 10px; box-shadow: 0 10px 20px rgba(255,85,0,0.3); }
+        .admin-btn-danger { background: rgba(255,0,0,0.1); color: #ff4444; border: 1px solid rgba(255,0,0,0.3); padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 15px; }
         .form-group { display: none; }
         .form-group.active { display: block; }
     </style>
@@ -118,7 +131,7 @@
     <div class="ambient-glow glow-2" id="glow2"></div>
 
     <header class="header">
-        <img src="1335.jpg" alt="ФЕНИКС" class="logo-img-main" onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='flex';">
+        <img id="mainLogoElement" src="1335.jpg" alt="ФЕНИКС" class="logo-img-main" onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='flex';">
         <div id="fallbackLogo" class="fallback-logo">🦅 ФЕНИКС</div>
         <button class="admin-btn-header" onclick="openAdmin()">⚙️</button>
     </header>
@@ -134,7 +147,7 @@
     <div id="screen-news" class="screen active">
         <div id="newsContainer"></div>
         <div class="chat-section">
-            <div class="chat-header">💬 Обсуждение новостей</div>
+            <div class="chat-header">💬 Обсуждение</div>
             <div class="chat-messages" id="chat-news"></div>
             <div class="chat-input-area">
                 <input type="text" class="chat-input" id="input-news" placeholder="Написать сообщение...">
@@ -156,17 +169,16 @@
         </div>
     </div>
 
-    <!-- 3. СОСТАВ И РЕЙТИНГ -->
+    <!-- 3. СОСТАВ И ГОЛОСОВАНИЕ -->
     <div id="screen-squad" class="screen">
         <div class="field" id="fieldContainer">
             <div class="line-center"></div><div class="circle-center"></div>
             <div class="goal-area goal-top"></div><div class="goal-area goal-bottom"></div>
         </div>
         
-        <!-- Голосование фанатов -->
         <div class="chat-section" style="margin-bottom: 20px;">
             <div class="chat-header">⭐ Фанатское голосование</div>
-            <p style="font-size: 12px; color: #aaa; margin-bottom: 12px;">Выбери игрока и предложи свой рейтинг. Оценка на поле — это средний балл всех фанатов!</p>
+            <p style="font-size: 12px; color: #aaa; margin-bottom: 12px;">Выбери игрока и предложи рейтинг. Оценка на поле — это средний балл фанатов!</p>
             <div class="vote-section">
                 <div class="vote-row">
                     <select id="vote-player" class="vote-select"></select>
@@ -176,12 +188,11 @@
             </div>
         </div>
 
-        <!-- Чат состава -->
         <div class="chat-section">
             <div class="chat-header">💬 Обсуждение состава</div>
             <div class="chat-messages" id="chat-squad"></div>
             <div class="chat-input-area">
-                <input type="text" class="chat-input" id="input-squad" placeholder="Кто должен играть в старте?">
+                <input type="text" class="chat-input" id="input-squad" placeholder="Кто должен играть?">
                 <button class="chat-send" onclick="sendChat('squad')">➤</button>
             </div>
         </div>
@@ -191,7 +202,7 @@
     <div id="screen-shop" class="screen">
         <div class="shop-grid" id="shopContainer"></div>
         <div class="chat-section" style="margin-top: 20px;">
-            <div class="chat-header">💬 Отзывы и вопросы</div>
+            <div class="chat-header">💬 Отзывы</div>
             <div class="chat-messages" id="chat-shop"></div>
             <div class="chat-input-area">
                 <input type="text" class="chat-input" id="input-shop" placeholder="Спросить про мерч...">
@@ -200,7 +211,7 @@
         </div>
     </div>
 
-    <!-- Админ-панель (Оставил только нужные поля для компактности кода) -->
+    <!-- АДМИНКА С ЗАГРУЗКОЙ ФАЙЛОВ -->
     <div class="modal-overlay" id="adminModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -211,29 +222,59 @@
                 <button class="admin-tab active" onclick="setAdminForm('form-news', this)">📰 Новость</button>
                 <button class="admin-tab" onclick="setAdminForm('form-match', this)">📅 Матч</button>
                 <button class="admin-tab" onclick="setAdminForm('form-player', this)">🏒 Игрок</button>
+                <button class="admin-tab" onclick="setAdminForm('form-shop', this)">🛒 Товар</button>
                 <button class="admin-tab" onclick="setAdminForm('form-settings', this)">🎨 Дизайн</button>
             </div>
             
             <div id="form-news" class="form-group active">
                 <input type="text" id="nTitle" class="admin-input" placeholder="Заголовок">
                 <textarea id="nText" class="admin-input" placeholder="Текст"></textarea>
+                <label class="file-label">Фото новости (из галереи):</label>
+                <input type="file" id="nImgFile" class="admin-input" accept="image/*">
             </div>
+            
             <div id="form-match" class="form-group">
                 <input type="text" id="mOpponent" class="admin-input" placeholder="Соперник">
                 <input type="text" id="mDate" class="admin-input" placeholder="Дата">
-                <input type="number" id="mScoreF" class="admin-input" placeholder="Счет Мы">
-                <input type="number" id="mScoreO" class="admin-input" placeholder="Счет Они">
+                <div class="input-row">
+                    <input type="number" id="mScoreF" class="admin-input" placeholder="Счет Мы">
+                    <input type="number" id="mScoreO" class="admin-input" placeholder="Счет Они">
+                </div>
+                <label class="file-label">Логотип соперника (из галереи):</label>
+                <input type="file" id="mLogoOFile" class="admin-input" accept="image/*">
             </div>
+            
             <div id="form-player" class="form-group">
                 <input type="text" id="pName" class="admin-input" placeholder="Фамилия">
-                <select id="pPos" class="admin-input">
-                    <option value="pos-c">ЦН</option><option value="pos-lw">ЛН</option><option value="pos-rw">ПН</option>
-                    <option value="pos-ld">ЛЗ</option><option value="pos-rd">ПЗ</option><option value="pos-gk">ВР</option>
-                </select>
+                <div class="input-row">
+                    <input type="number" id="pRating" class="admin-input" placeholder="Рейтинг (0-99)">
+                    <select id="pPos" class="admin-input" style="margin-bottom:0;">
+                        <option value="pos-c">ЦН</option><option value="pos-lw">ЛН</option><option value="pos-rw">ПН</option>
+                        <option value="pos-ld">ЛЗ</option><option value="pos-rd">ПЗ</option><option value="pos-gk">ВР</option>
+                    </select>
+                </div>
+                <label class="file-label" style="margin-top:10px;">Фото игрока (из галереи):</label>
+                <input type="file" id="pPhotoFile" class="admin-input" accept="image/*">
             </div>
+
+            <div id="form-shop" class="form-group">
+                <input type="text" id="sName" class="admin-input" placeholder="Название товара">
+                <input type="text" id="sPrice" class="admin-input" placeholder="Цена (напр. 1500 ₽)">
+                <input type="text" id="sEmoji" class="admin-input" placeholder="Эмодзи (если нет фото)">
+                <label class="file-label">Фото товара (из галереи):</label>
+                <input type="file" id="sImgFile" class="admin-input" accept="image/*">
+            </div>
+
             <div id="form-settings" class="form-group">
-                <input type="color" id="gColor" class="admin-input" style="height: 50px;">
-                <button class="admin-btn-save" style="background:#cc0000; margin-top:20px;" onclick="localStorage.clear(); location.reload();">Сбросить всё</button>
+                <label class="file-label">Цвет приложения:</label>
+                <input type="color" id="gColor" class="admin-input" style="height: 50px; padding: 5px;">
+                <label class="file-label">Главный ЛОГОТИП клуба (в шапке):</label>
+                <input type="file" id="gLogoFile" class="admin-input" accept="image/*">
+                <label class="file-label" style="margin-top:10px;">Фоновая картинка приложения:</label>
+                <input type="file" id="gBgFile" class="admin-input" accept="image/*">
+                
+                <button class="admin-btn-danger" style="background:transparent; border:1px solid #555; color:#888;" onclick="clearVisuals()">Удалить свой фон и лого</button>
+                <button class="admin-btn-danger" onclick="if(confirm('Точно сбросить ВСЁ?')) { localStorage.clear(); location.reload(); }">Сбросить базу</button>
             </div>
 
             <button class="admin-btn-save" onclick="saveData()">💾 Сохранить</button>
@@ -244,10 +285,10 @@
         const fanNames = ["Болельщик", "Фанат", "Ультрас", "PhoenixFan"];
         
         let db = {
-            news: JSON.parse(localStorage.getItem('phx_news_v8')) || [{ date: "Сегодня", title: "Победа в дерби!", text: "Феникс вырывает невероятную победу!" }],
-            matches: JSON.parse(localStorage.getItem('phx_matches_v8')) || [{ date: "20 Окт, 18:00", opponent: "Титан", scoreF: "4", scoreO: "2", status: "Завершен", logoO: "" }],
-            shop: JSON.parse(localStorage.getItem('phx_shop_v8')) || [{ name: "Джерси", price: "2 500 ₽", img: "👕" }],
-            players: JSON.parse(localStorage.getItem('phx_players_v8')) || [
+            news: JSON.parse(localStorage.getItem('phx_news_v9')) || [{ date: "Сегодня", title: "Приложение обновлено!", text: "Вернулась загрузка фотографий. Проверьте!", img: "" }],
+            matches: JSON.parse(localStorage.getItem('phx_matches_v9')) || [{ date: "20 Окт, 18:00", opponent: "Титан", scoreF: "4", scoreO: "2", status: "Завершен", logoO: "" }],
+            shop: JSON.parse(localStorage.getItem('phx_shop_v9')) || [{ name: "Джерси", price: "2 500 ₽", img: "👕" }],
+            players: JSON.parse(localStorage.getItem('phx_players_v9')) || [
                 { name: "Петров", baseRating: 88, pos: "pos-c", posName: "ЦН", photo: "" },
                 { name: "Сидоров", baseRating: 85, pos: "pos-lw", posName: "ЛН", photo: "" },
                 { name: "Иванов", baseRating: 82, pos: "pos-rw", posName: "ПН", photo: "" },
@@ -255,9 +296,9 @@
                 { name: "Соколов", baseRating: 81, pos: "pos-rd", posName: "ПЗ", photo: "" },
                 { name: "Давидонис", baseRating: 91, pos: "pos-gk", posName: "ВР", photo: "" }
             ],
-            design: JSON.parse(localStorage.getItem('phx_design_v8')) || { color: "#ff5500", bg: "" },
-            chats: JSON.parse(localStorage.getItem('phx_chats_v8')) || { news: [], calendar: [], squad: [], shop: [] },
-            votes: JSON.parse(localStorage.getItem('phx_votes_v8')) || {} // Структура: { "pos-c": [88, 90, 89] }
+            design: JSON.parse(localStorage.getItem('phx_design_v9')) || { color: "#ff5500", bg: "", mainLogo: "" },
+            chats: JSON.parse(localStorage.getItem('phx_chats_v9')) || { news: [], calendar: [], squad: [], shop: [] },
+            votes: JSON.parse(localStorage.getItem('phx_votes_v9')) || {}
         };
 
         function switchTab(tabId, btnElement) {
@@ -267,122 +308,172 @@
             btnElement.classList.add('active');
         }
 
-        // Рендер Чатов
         function renderChats() {
             ['news', 'calendar', 'squad', 'shop'].forEach(room => {
                 const container = document.getElementById(`chat-${room}`);
                 if (!container) return;
                 container.innerHTML = db.chats[room].map(msg => `
-                    <div class="msg">
-                        <div class="msg-avatar">${msg.name.charAt(0)}</div>
-                        <div class="msg-content">
-                            <div class="msg-name">${msg.name}</div>
-                            <div class="msg-text">${msg.text}</div>
-                        </div>
-                    </div>
+                    <div class="msg"><div class="msg-avatar">${msg.name.charAt(0)}</div>
+                    <div class="msg-content"><div class="msg-name">${msg.name}</div><div class="msg-text">${msg.text}</div></div></div>
                 `).join('');
-                container.scrollTop = container.scrollHeight; // Скролл вниз
+                container.scrollTop = container.scrollHeight;
             });
         }
 
         function sendChat(room) {
             const input = document.getElementById(`input-${room}`);
-            const text = input.value.trim();
-            if(text) {
-                const randomName = fanNames[Math.floor(Math.random() * fanNames.length)] + Math.floor(Math.random() * 99);
-                db.chats[room].push({ name: randomName, text: text });
-                localStorage.setItem('phx_chats_v8', JSON.stringify(db.chats));
-                input.value = '';
-                renderChats();
+            if(input.value.trim()) {
+                db.chats[room].push({ name: fanNames[Math.floor(Math.random() * fanNames.length)] + Math.floor(Math.random() * 99), text: input.value.trim() });
+                localStorage.setItem('phx_chats_v9', JSON.stringify(db.chats));
+                input.value = ''; renderChats();
             }
         }
 
-        // Логика голосования за рейтинг
         function renderVoteSelect() {
-            const select = document.getElementById('vote-player');
-            select.innerHTML = db.players.map(p => `<option value="${p.pos}">${p.posName}: ${p.name}</option>`).join('');
+            document.getElementById('vote-player').innerHTML = db.players.map(p => `<option value="${p.pos}">${p.posName}: ${p.name}</option>`).join('');
         }
 
         function submitVote() {
             const pos = document.getElementById('vote-player').value;
             const score = parseInt(document.getElementById('vote-score').value);
-            
             if(score > 0 && score <= 99) {
                 if(!db.votes[pos]) db.votes[pos] = [];
                 db.votes[pos].push(score);
-                localStorage.setItem('phx_votes_v8', JSON.stringify(db.votes));
+                localStorage.setItem('phx_votes_v9', JSON.stringify(db.votes));
                 document.getElementById('vote-score').value = '';
-                alert("Твой голос учтен! Рейтинг игрока пересчитан.");
-                renderAll(); // Перерисовываем поле с новыми оценками
-            } else {
-                alert("Введи рейтинг от 1 до 99");
-            }
+                alert("Голос учтен!"); renderAll();
+            } else { alert("Введи рейтинг от 1 до 99"); }
         }
 
-        // Вычисление итогового рейтинга (Базовый + среднее от фанатов)
         function getPlayerRating(player) {
             if(!db.votes[player.pos] || db.votes[player.pos].length === 0) return player.baseRating;
-            
-            let sum = player.baseRating; // Учитываем базовый рейтинг как первый голос
-            db.votes[player.pos].forEach(v => sum += v);
-            let avg = Math.round(sum / (db.votes[player.pos].length + 1));
-            return avg;
+            let sum = player.baseRating; db.votes[player.pos].forEach(v => sum += v);
+            return Math.round(sum / (db.votes[player.pos].length + 1));
         }
 
         function renderAll() {
+            // Дизайн и Лого
             document.documentElement.style.setProperty('--primary', db.design.color);
             document.getElementById('glow1').style.background = db.design.color + '88';
             document.getElementById('glow2').style.background = db.design.color + '88';
+            document.body.style.backgroundImage = db.design.bg ? `url('${db.design.bg}')` : 'none';
+            
+            const logoEl = document.getElementById('mainLogoElement');
+            logoEl.src = db.design.mainLogo || "1335.jpg";
+            logoEl.style.display = 'block'; document.getElementById('fallbackLogo').style.display = 'none';
 
-            // Контент (упрощен для компактности)
-            document.getElementById('newsContainer').innerHTML = db.news.map(n => `<div class="glass-card"><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div></div>`).reverse().join('');
-            document.getElementById('calendarContainer').innerHTML = db.matches.map(m => `<div class="glass-card"><div class="match-row"><div class="team-block"><div class="team-name">Феникс</div></div><div class="score-pill">${m.scoreF} : ${m.scoreO}</div><div class="team-block"><div class="team-name">${m.opponent}</div></div></div></div>`).reverse().join('');
-            document.getElementById('shopContainer').innerHTML = db.shop.map(s => `<div class="glass-card shop-item"><div class="shop-img">${s.img}</div><div class="shop-title">${s.name}</div><div class="shop-price">${s.price}</div></div>`).reverse().join('');
+            // Контент с картинками!
+            document.getElementById('newsContainer').innerHTML = db.news.map((n, i) => {
+                if(i === db.news.length - 1 && n.img) {
+                    return `<div class="glass-card featured-news" style="background-image: url('${n.img}'); border-color: var(--primary);"><div class="featured-overlay"><div class="news-date">${n.date}</div><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div></div></div>`;
+                }
+                return `<div class="glass-card"><div class="news-date">${n.date}</div><div class="news-title">${n.title}</div><div class="news-text">${n.text}</div></div>`;
+            }).reverse().join('');
 
-            // Поле состава с динамическим рейтингом!
+            document.getElementById('calendarContainer').innerHTML = db.matches.map(m => {
+                let lf = `<img src="${db.design.mainLogo || '1335.jpg'}" onerror="this.outerHTML='🦅'">`;
+                let lo = m.logoO ? `<img src="${m.logoO}" onerror="this.outerHTML='🛡️'">` : '🛡️';
+                return `<div class="glass-card"><div class="match-header">Матч • ${m.date}</div><div class="match-row"><div class="team-block"><div class="team-logo">${lf}</div><div class="team-name">Феникс</div></div><div class="score-block"><div class="match-time">${m.status}</div><div class="score-pill">${m.scoreF} : ${m.scoreO}</div></div><div class="team-block"><div class="team-logo">${lo}</div><div class="team-name">${m.opponent}</div></div></div></div>`;
+            }).reverse().join('');
+
+            document.getElementById('shopContainer').innerHTML = db.shop.map(s => {
+                let imgTag = (s.img.startsWith('data:image') || s.img.startsWith('http')) ? `<img src="${s.img}" class="shop-img">` : `<div class="shop-img">${s.img}</div>`;
+                return `<div class="glass-card shop-item">${imgTag}<div class="shop-title">${s.name}</div><div class="shop-price">${s.price}</div></div>`;
+            }).reverse().join('');
+
             let field = document.getElementById('fieldContainer');
             field.querySelectorAll('.player-card').forEach(c => c.remove());
             db.players.forEach(p => {
-                let currentRating = getPlayerRating(p); // Считаем рейтинг с учетом фанатов
-                
-                let card = document.createElement('div');
-                card.className = `player-card ${p.pos}`;
-                card.innerHTML = `
-                    <div class="card-rating">${currentRating}</div>
-                    <div class="card-pos">${p.posName}</div>
-                    <div class="card-photo"></div>
-                    <div class="card-name">${p.name}</div>
-                `;
+                let bg = p.photo ? `url('${p.photo}')` : `url('https://ui-avatars.com/api/?name=${p.name}&background=111&color=fff')`;
+                let card = document.createElement('div'); card.className = `player-card ${p.pos}`;
+                card.innerHTML = `<div class="card-rating">${getPlayerRating(p)}</div><div class="card-pos">${p.posName}</div><div class="card-photo" style="background-image: ${bg}"></div><div class="card-name">${p.name}</div>`;
                 field.appendChild(card);
             });
 
-            renderChats();
-            renderVoteSelect();
+            renderChats(); renderVoteSelect();
         }
 
-        // Админка
         let currentAdminForm = 'form-news';
-        function openAdmin() { if(prompt("Пароль (1234):") === "1234") document.getElementById('adminModal').classList.add('active'); }
+        function openAdmin() { if(prompt("Пароль (1234):") === "1234") { document.getElementById('gColor').value = db.design.color; document.getElementById('adminModal').classList.add('active'); } }
         function closeAdmin() { document.getElementById('adminModal').classList.remove('active'); }
-        function setAdminForm(id, btn) {
-            currentAdminForm = id;
-            document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active')); btn.classList.add('active');
-            document.querySelectorAll('.form-group').forEach(f => f.classList.remove('active')); document.getElementById(id).classList.add('active');
+        function setAdminForm(id, btn) { currentAdminForm = id; document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.form-group').forEach(f => f.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+        // УМНАЯ ОБРАБОТКА КАРТИНОК ИЗ ФАЙЛОВ
+        function processFilePromise(inputId, maxWidth) {
+            return new Promise((resolve) => {
+                let file = document.getElementById(inputId).files[0];
+                if (!file) { resolve(null); return; }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width, h = img.height;
+                        if (w > maxWidth) { h = Math.round(h * (maxWidth / w)); w = maxWidth; }
+                        canvas.width = w; canvas.height = h;
+                        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', 0.8));
+                    }
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            });
         }
 
-        function saveData() {
+        async function saveData() {
             if (currentAdminForm === 'form-news') {
-                db.news.push({ date: "Только что", title: document.getElementById('nTitle').value, text: document.getElementById('nText').value });
+                let t = document.getElementById('nTitle').value;
+                if(t) {
+                    let imgData = await processFilePromise('nImgFile', 800);
+                    db.news.push({ date: "Только что", title: t, text: document.getElementById('nText').value, img: imgData || "" });
+                }
             } else if (currentAdminForm === 'form-match') {
-                db.matches.push({ date: document.getElementById('mDate').value, opponent: document.getElementById('mOpponent').value, scoreF: document.getElementById('mScoreF').value, scoreO: document.getElementById('mScoreO').value });
+                let o = document.getElementById('mOpponent').value;
+                if(o) {
+                    let imgData = await processFilePromise('mLogoOFile', 300);
+                    db.matches.push({ date: document.getElementById('mDate').value, opponent: o, scoreF: document.getElementById('mScoreF').value || "-", scoreO: document.getElementById('mScoreO').value || "-", status: document.getElementById('mScoreF').value ? "Завершен" : "Ожидается", logoO: imgData || "" });
+                }
+            } else if (currentAdminForm === 'form-player') {
+                let n = document.getElementById('pName').value, r = document.getElementById('pRating').value, pos = document.getElementById('pPos').value;
+                let posNames = {"pos-c":"ЦН", "pos-lw":"ЛН", "pos-rw":"ПН", "pos-ld":"ЛЗ", "pos-rd":"ПЗ", "pos-gk":"ВР"};
+                if(n && r) {
+                    let imgData = await processFilePromise('pPhotoFile', 400);
+                    let idx = db.players.findIndex(p => p.pos === pos);
+                    let finalPhoto = imgData || (idx > -1 ? db.players[idx].photo : "");
+                    let newPlayer = { name: n, baseRating: parseInt(r), pos: pos, posName: posNames[pos], photo: finalPhoto };
+                    if(idx > -1) db.players[idx] = newPlayer; else db.players.push(newPlayer);
+                    // Сбрасываем голоса фанатов при изменении игрока
+                    db.votes[pos] = [];
+                }
+            } else if (currentAdminForm === 'form-shop') {
+                let n = document.getElementById('sName').value;
+                if(n) {
+                    let imgData = await processFilePromise('sImgFile', 400);
+                    db.shop.push({ name: n, price: document.getElementById('sPrice').value, img: imgData || document.getElementById('sEmoji').value || "📦" });
+                }
             } else if (currentAdminForm === 'form-settings') {
                 db.design.color = document.getElementById('gColor').value;
+                let bgData = await processFilePromise('gBgFile', 1080);
+                if (bgData) db.design.bg = bgData;
+                let logoData = await processFilePromise('gLogoFile', 500);
+                if (logoData) db.design.mainLogo = logoData;
             }
             
-            localStorage.setItem('phx_news_v8', JSON.stringify(db.news));
-            localStorage.setItem('phx_matches_v8', JSON.stringify(db.matches));
-            localStorage.setItem('phx_design_v8', JSON.stringify(db.design));
+            localStorage.setItem('phx_news_v9', JSON.stringify(db.news));
+            localStorage.setItem('phx_matches_v9', JSON.stringify(db.matches));
+            localStorage.setItem('phx_shop_v9', JSON.stringify(db.shop));
+            localStorage.setItem('phx_players_v9', JSON.stringify(db.players));
+            localStorage.setItem('phx_design_v9', JSON.stringify(db.design));
+            localStorage.setItem('phx_votes_v9', JSON.stringify(db.votes));
+            
+            document.querySelectorAll('.admin-input[type="text"], .admin-input[type="number"], textarea, input[type="file"]').forEach(i => i.value = '');
             renderAll(); closeAdmin();
+        }
+
+        function clearVisuals() {
+            db.design.bg = ""; db.design.mainLogo = "";
+            localStorage.setItem('phx_design_v9', JSON.stringify(db.design));
+            renderAll(); alert("Ваш фон и логотип удалены (возвращен стандарт).");
         }
 
         renderAll();
