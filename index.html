@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ПХК Феникс - Live</title>
     
+    <!-- ДОБАВЛЕНО ДЛЯ ПРИЛОЖЕНИЯ (PWA) -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="theme-color" content="#ff5500">
+    <!-- ============================= -->
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -291,6 +297,13 @@
     </div>
 
     <script>
+        // РЕГИСТРАЦИЯ PWA (ДЛЯ УСТАНОВКИ КАК ПРИЛОЖЕНИЕ НА ТЕЛЕФОН)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW setup skipped'));
+            });
+        }
+
         const firebaseConfig = {
             apiKey: "AIzaSyDsxGKTwHzLPwep_7EYiHHKAxsBwbJ-uEM",
             authDomain: "phoenix-9adab.firebaseapp.com",
@@ -612,7 +625,8 @@
             let tg = document.getElementById('tgLinkInput').value.trim();
             let max = document.getElementById('maxLinkInput').value.trim();
             
-            // Удаляем случайные пробелы внутри ссылки MAX
+            // Жесткое удаление всех пробелов из ссылок
+            tg = tg.replace(/\s+/g, '');
             max = max.replace(/\s+/g, '');
             
             if (tg !== "" && tg !== "#" && !tg.startsWith("http")) tg = "https://" + tg;
