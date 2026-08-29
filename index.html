@@ -15,10 +15,11 @@
         .ambient-glow { position: fixed; width: 350px; height: 350px; background: var(--primary); filter: blur(120px); border-radius: 50%; opacity: 0.25; z-index: -1; pointer-events: none; }
         .glow-1 { top: -100px; left: -100px; } .glow-2 { bottom: 10%; right: -150px; opacity: 0.2; }
 
-        .header { display: flex; justify-content: center; align-items: center; padding: 15px 20px 10px; position: sticky; top: 0; z-index: 100; background: linear-gradient(180deg, rgba(5,3,1,0.98) 0%, rgba(5,3,1,0) 100%); height: 95px; }
+        .top-bar { position: relative; z-index: 1000; width: 100%; padding-top: 10px; }
+        .header { display: flex; justify-content: center; align-items: center; padding: 10px 20px; position: relative; }
         .logo-img-main { height: 80px; width: auto; max-width: 200px; object-fit: contain; filter: drop-shadow(0 0 15px var(--primary-glow)); user-select: none; -webkit-user-select: none; }
         
-        .menu-burger { position: absolute; right: 20px; top: 28px; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; z-index: 101; backdrop-filter: blur(10px); }
+        .menu-burger { position: absolute; right: 20px; top: 30px; width: 40px; height: 40px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; z-index: 101; backdrop-filter: blur(10px); }
         .menu-burger span { width: 18px; height: 2px; background: #fff; border-radius: 2px; pointer-events: none; }
 
         .social-dropdown { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(15px); padding: 20px; }
@@ -49,7 +50,6 @@
 
         .glass-card { background: var(--glass-bg); backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 28px; padding: 20px; margin-bottom: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); position: relative; overflow: hidden; }
         
-        /* Новый стиль новостей */
         .news-main-img { width: 100%; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--glass-border); object-fit: cover; max-height: 300px; display: block; }
         .news-date { font-size: 11px; color: var(--primary); font-weight: 800; text-transform: uppercase; margin-bottom: 6px; }
         .news-title { font-size: 20px; font-weight: 800; line-height: 1.2; margin-bottom: 8px; }
@@ -137,8 +137,19 @@
 </head>
 <body>
 
-    <div class="menu-burger" onclick="toggleSocialMenu()">
-        <span></span><span></span><span></span>
+    <div class="top-bar">
+        <div class="menu-burger" onclick="toggleSocialMenu()">
+            <span></span><span></span><span></span>
+        </div>
+        <header class="header">
+            <img id="mainLogoElement" src="1335.jpg" alt="ФЕНИКС" class="logo-img-main" onerror="this.src='https://ui-avatars.com/api/?name=PH&background=ff5500&color=fff'">
+        </header>
+        <nav class="top-nav">
+            <button type="button" class="tab-pill active" onclick="switchTab('news', this)">Главная</button>
+            <button type="button" class="tab-pill" onclick="switchTab('calendar', this)">Календарь</button>
+            <button type="button" class="tab-pill" onclick="switchTab('squad', this)">Состав</button>
+            <button type="button" class="tab-pill" onclick="switchTab('shop', this)">Магазин</button>
+        </nav>
     </div>
 
     <!-- Меню соцсетей -->
@@ -163,18 +174,7 @@
     <div class="ambient-glow glow-1" id="glow1"></div>
     <div class="ambient-glow glow-2" id="glow2"></div>
 
-    <header class="header">
-        <img id="mainLogoElement" src="1335.jpg" alt="ФЕНИКС" class="logo-img-main" onerror="this.src='https://ui-avatars.com/api/?name=PH&background=ff5500&color=fff'">
-    </header>
-
-    <nav class="top-nav">
-        <button type="button" class="tab-pill active" onclick="switchTab('news', this)">Главная</button>
-        <button type="button" class="tab-pill" onclick="switchTab('calendar', this)">Календарь</button>
-        <button type="button" class="tab-pill" onclick="switchTab('squad', this)">Состав</button>
-        <button type="button" class="tab-pill" onclick="switchTab('shop', this)">Магазин</button>
-    </nav>
-
-    <!-- 1. ГЛАВНАЯ (ЧАТ УДАЛЕН, ЛАЙКИ И КОММЕНТЫ В КАРТОЧКАХ) -->
+    <!-- 1. ГЛАВНАЯ (НОВОСТИ) -->
     <div id="screen-news" class="screen active">
         <div id="nextMatchWidgetContainer"></div>
         <div id="newsContainer"></div>
@@ -304,7 +304,7 @@
         const db = firebase.database();
 
         let isAdmin = false;
-        let localData = { news: {}, matches: {}, shop: {}, players: {}, chats: { calendar: {}, squad: {}, shop: {} }, votes: {}, social: { tg: "#", max: "#" }, nextMatch: null, design: { color: "#ff5500", bg: "" } };
+        let localData = { news: {}, matches: {}, shop: {}, players: {}, chats: { calendar: {}, squad: {}, shop: {} }, votes: {}, social: { tg: "https://t.me/Phoenix_floorballteam", max: "https://max.ru/join/3NZROyrUf3vVG_ztCdQHrhGD8BGFym4kbaaW4ql_GNM" }, nextMatch: null, design: { color: "#ff5500", bg: "" } };
         const fanNames = ["Болельщик", "Фанат", "Ультрас", "PhoenixFan", "Игрок"];
         let openNewsComments = {}; 
 
@@ -334,7 +334,7 @@
         const refs = ['news', 'matches', 'shop', 'players', 'chats', 'votes', 'social', 'nextMatch', 'design'];
         refs.forEach(refName => {
             db.ref(refName).on('value', (snapshot) => {
-                localData[refName] = snapshot.val() || (refName === 'social' ? {tg:"#", max:"#"} : (refName === 'design' ? {color:"#ff5500", bg:""} : {}));
+                localData[refName] = snapshot.val() || (refName === 'social' ? {tg:"https://t.me/Phoenix_floorballteam", max:"https://max.ru/join/3NZROyrUf3vVG_ztCdQHrhGD8BGFym4kbaaW4ql_GNM"} : (refName === 'design' ? {color:"#ff5500", bg:""} : {}));
                 renderAll();
             });
         });
@@ -408,10 +408,10 @@
                 `;
             } else { nmContainer.innerHTML = ''; }
 
-            const soc = localData.social || { tg: "https://t.me/Phoenix_floorballteam", max: "https://max.ru/join/3NZROyrUf3vVG _ztCdQHrhGD8BGFym4kbaaW4ql_GNM" };
+            const soc = localData.social || { tg: "https://t.me/Phoenix_floorballteam", max: "https://max.ru/join/3NZROyrUf3vVG_ztCdQHrhGD8BGFym4kbaaW4ql_GNM" };
             document.getElementById('socialLinksContainer').innerHTML = `
-                <a href="${soc.tg}" target="_blank" class="social-link">Мы в Telegram</a>
-                <a href="${soc.max}" target="_blank" class="social-link">Мы в MAX</a>
+                <a href="${soc.tg}" target="_blank" rel="noopener noreferrer" class="social-link">Мы в Telegram</a>
+                <a href="${soc.max}" target="_blank" rel="noopener noreferrer" class="social-link">Мы в MAX</a>
             `;
             if(document.getElementById('tgLinkInput')) { document.getElementById('tgLinkInput').value = soc.tg; document.getElementById('maxLinkInput').value = soc.max; }
 
@@ -609,7 +609,16 @@
         }
 
         function saveSocialLinks() {
-            db.ref('social').set({ tg: document.getElementById('tgLinkInput').value.trim() || "#", max: document.getElementById('maxLinkInput').value.trim() || "#" });
+            let tg = document.getElementById('tgLinkInput').value.trim();
+            let max = document.getElementById('maxLinkInput').value.trim();
+            
+            // Удаляем случайные пробелы внутри ссылки MAX
+            max = max.replace(/\s+/g, '');
+            
+            if (tg !== "" && tg !== "#" && !tg.startsWith("http")) tg = "https://" + tg;
+            if (max !== "" && max !== "#" && !max.startsWith("http")) max = "https://" + max;
+            
+            db.ref('social').set({ tg: tg || "#", max: max || "#" });
             alert("Ссылки на соцсети сохранены!");
         }
 
