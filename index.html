@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ПХК Феникс - Live</title>
+    <title>ПХК Феникс - Live | Pro Edition</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="theme-color" content="#ff5500">
 
-    <!-- Firebase SDKs -->
+    <!-- Firebase Core & Modules -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
@@ -17,22 +17,30 @@
 
     <style>
         /* ==========================================================================
-           ROOT VARIABLES & THEMES
+           1. ROOT VARIABLES & THEMING
            ========================================================================== */
         :root { 
+            /* Core Brand Colors */
             --primary: #ff5500; 
             --primary-glow: rgba(255, 85, 0, 0.4); 
             --primary-grad: linear-gradient(135deg, #ff5500, #cc4400);
+            
+            /* Dark Theme (Default) */
             --bg-dark: #0a0b10; 
             --glass-bg: rgba(255, 255, 255, 0.04); 
             --glass-border: rgba(255, 255, 255, 0.08); 
             --text-main: #ffffff; 
             --text-muted: #a0a5aa; 
+            
+            /* UI Settings */
             --card-shadow: 0 10px 30px rgba(0,0,0,0.3);
             --transition-speed: 0.3s;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
         }
 
-        /* LIGHT THEME VARIABLES */
+        /* Light Theme Overrides */
         body[data-theme="light"] {
             --bg-dark: #f0f2f5; 
             --glass-bg: rgba(255, 255, 255, 0.7); 
@@ -42,16 +50,17 @@
             --card-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
 
-        body[data-theme="light"] .player-card { background: rgba(255,255,255,0.9); }
+        body[data-theme="light"] .player-card, 
+        body[data-theme="light"] .fantasy-player-row { background: rgba(255,255,255,0.9); }
         body[data-theme="light"] .card-name, 
-        body[data-theme="light"] .card-rating { color: #111; text-shadow: none; }
-        body[data-theme="light"] .admin-input { background: rgba(255,255,255,0.9); color: #111; }
+        body[data-theme="light"] .card-rating { color: #111111; text-shadow: none; }
+        body[data-theme="light"] .admin-input { background: rgba(255,255,255,0.9); color: #111111; border-color: rgba(0,0,0,0.2); }
         body[data-theme="light"] .stats-tbl td, 
         body[data-theme="light"] .msg-text, 
-        body[data-theme="light"] .news-text { color: #222; }
+        body[data-theme="light"] .news-text { color: #222222; }
 
         /* ==========================================================================
-           BASE STYLES & RESET
+           2. BASE STYLES & TYPOGRAPHY
            ========================================================================== */
         * { 
             box-sizing: border-box; 
@@ -74,13 +83,13 @@
         }
 
         /* ==========================================================================
-           ANIMATIONS & UTILITIES
+           3. ANIMATIONS & EFFECTS
            ========================================================================== */
         .skeleton { 
             background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%); 
             background-size: 200% 100%; 
             animation: skeleton-loading 1.5s infinite; 
-            border-radius: 14px; 
+            border-radius: var(--border-radius-md); 
             min-height: 100px; 
             margin-bottom: 15px; 
         }
@@ -91,11 +100,11 @@
         }
 
         @keyframes scaleIn { 
-            from { opacity: 0; transform: translateY(15px); } 
-            to { opacity: 1; transform: translateY(0); } 
+            from { opacity: 0; transform: translateY(15px) scale(0.98); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
         }
 
-        @keyframes pulse { 
+        @keyframes pulseAlert { 
             0% { box-shadow: 0 0 0 0 rgba(255, 0, 64, 0.7); } 
             70% { box-shadow: 0 0 0 10px rgba(255, 0, 64, 0); } 
             100% { box-shadow: 0 0 0 0 rgba(255, 0, 64, 0); } 
@@ -103,22 +112,24 @@
 
         .ambient-glow { 
             position: fixed; 
-            width: 400px; 
-            height: 400px; 
+            width: 50vw; 
+            height: 50vw; 
+            max-width: 500px;
+            max-height: 500px;
             background: var(--primary); 
-            filter: blur(150px); 
+            filter: blur(120px); 
             border-radius: 50%; 
-            opacity: 0.15; 
+            opacity: 0.12; 
             z-index: -1; 
             pointer-events: none; 
-            transition: background 0.5s; 
+            transition: background 0.5s ease-in-out; 
         }
         
-        .glow-1 { top: -100px; left: -100px; } 
-        .glow-2 { bottom: 10%; right: -150px; opacity: 0.1; }
+        .glow-1 { top: -10%; left: -10%; } 
+        .glow-2 { bottom: 5%; right: -10%; opacity: 0.08; }
 
         /* ==========================================================================
-           NAVIGATION & HEADER
+           4. HEADER & NAVIGATION
            ========================================================================== */
         .top-bar { 
             position: relative; 
@@ -136,24 +147,25 @@
         }
 
         .logo-img-main { 
-            height: 85px; 
-            width: 85px; 
+            height: 90px; 
+            width: 90px; 
             border-radius: 50%; 
             object-fit: cover; 
-            filter: drop-shadow(0 4px 12px var(--primary-glow)); 
+            filter: drop-shadow(0 4px 15px var(--primary-glow)); 
             user-select: none; 
-            transition: transform var(--transition-speed) ease; 
+            transition: transform var(--transition-speed) cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            border: 2px solid var(--glass-border);
         }
 
         .logo-img-main:hover { 
-            transform: scale(1.05); 
+            transform: scale(1.08) rotate(3deg); 
         }
         
-        .menu-burger, .notif-bell, .cart-btn, .user-btn { 
+        .action-btn-top { 
             position: absolute; 
             top: 32px; 
-            width: 44px; 
-            height: 44px; 
+            width: 46px; 
+            height: 46px; 
             background: var(--glass-bg); 
             border: 1px solid var(--glass-border); 
             border-radius: 50%; 
@@ -162,55 +174,58 @@
             justify-content: center; 
             cursor: pointer; 
             z-index: 101; 
-            backdrop-filter: blur(10px); 
-            transition: all 0.2s; 
+            backdrop-filter: blur(12px); 
+            transition: all 0.2s ease; 
+            font-size: 20px;
         }
         
         .menu-burger { right: 20px; flex-direction: column; gap: 5px; }
-        .notif-bell { left: 20px; font-size: 20px; }
-        .cart-btn { right: 75px; font-size: 20px; }
-        .user-btn { left: 75px; font-size: 20px; }
+        .notif-bell { left: 20px; }
+        .cart-btn { right: 80px; }
+        .user-btn { left: 80px; }
         
-        .menu-burger:active, .notif-bell:active, .cart-btn:active, .user-btn:active { 
-            transform: scale(0.9); 
-            background: rgba(255,255,255,0.1); 
+        .action-btn-top:active { 
+            transform: scale(0.85); 
+            background: rgba(255,255,255,0.15); 
         }
         
         .menu-burger span { 
-            width: 20px; 
+            width: 22px; 
             height: 2px; 
             background: var(--text-main); 
             border-radius: 2px; 
             pointer-events: none; 
+            transition: 0.3s;
         }
 
         .badge-counter { 
             position: absolute; 
-            top: -2px; 
-            right: -2px; 
+            top: -4px; 
+            right: -4px; 
             background: #ff0040; 
-            color: #fff; 
+            color: #ffffff; 
             font-size: 11px; 
             font-weight: 900; 
-            min-width: 20px; 
-            height: 20px; 
-            border-radius: 10px; 
+            min-width: 22px; 
+            height: 22px; 
+            border-radius: 11px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             border: 2px solid var(--bg-dark); 
         }
         
-        .notif-badge { animation: pulse 2s infinite; }
+        .notif-badge { animation: pulseAlert 2s infinite; }
 
         .top-nav { 
             display: flex; 
-            gap: 10px; 
+            gap: 12px; 
             overflow-x: auto; 
-            padding: 15px 20px 25px; 
+            padding: 20px 20px 25px; 
             scrollbar-width: none; 
             z-index: 99; 
             position: relative; 
+            -webkit-overflow-scrolling: touch;
         }
         
         .top-nav::-webkit-scrollbar { display: none; }
@@ -219,41 +234,47 @@
             background: var(--glass-bg); 
             color: var(--text-muted); 
             border: 1px solid var(--glass-border); 
-            padding: 12px 22px; 
-            border-radius: 20px; 
+            padding: 14px 24px; 
+            border-radius: 24px; 
             font-size: 14px; 
             font-weight: 700; 
             cursor: pointer; 
             white-space: nowrap; 
-            transition: all var(--transition-speed); 
+            transition: all var(--transition-speed) ease; 
             backdrop-filter: blur(10px); 
+            letter-spacing: 0.3px;
         }
         
+        .tab-pill:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--text-main);
+        }
+
         .tab-pill.active { 
             background: var(--primary-grad); 
-            color: #fff; 
+            color: #ffffff; 
             border-color: transparent; 
-            box-shadow: 0 6px 15px var(--primary-glow); 
-            transform: translateY(-2px); 
+            box-shadow: 0 8px 20px var(--primary-glow); 
+            transform: translateY(-3px); 
         }
 
         .screen { 
             display: none; 
             padding: 0 20px 40px; 
-            animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+            animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
         }
         
         .screen.active { display: block; }
 
         /* ==========================================================================
-           UI COMPONENTS (CARDS, BUTTONS, INPUTS)
+           5. UI CARDS & FORMS
            ========================================================================== */
         .glass-card { 
             background: var(--glass-bg); 
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px); 
+            backdrop-filter: blur(24px); 
+            -webkit-backdrop-filter: blur(24px); 
             border: 1px solid var(--glass-border); 
-            border-radius: 24px; 
+            border-radius: var(--border-radius-lg); 
             padding: 24px; 
             margin-bottom: 24px; 
             box-shadow: var(--card-shadow); 
@@ -262,573 +283,311 @@
             transition: transform var(--transition-speed); 
         }
 
-        .btn-action {
-            background: rgba(255,255,255,0.1); 
+        .btn-action { 
+            background: rgba(255,255,255,0.05); 
             border: 1px solid var(--glass-border); 
             color: var(--text-main); 
-            padding: 8px 12px; 
-            border-radius: 12px; 
-            font-size: 12px; 
+            padding: 10px 16px; 
+            border-radius: var(--border-radius-sm); 
+            font-size: 13px; 
             font-weight: 700; 
             cursor: pointer; 
             display: flex; 
             align-items: center; 
-            justify-content: center;
-            gap: 5px; 
+            justify-content: center; 
+            gap: 8px; 
             margin-top: 15px; 
-            width: fit-content; 
-            transition: 0.2s;
+            transition: 0.2s; 
         }
-
-        .btn-action:hover {
+        
+        .btn-action:hover { 
             background: var(--primary-grad); 
-            border-color: transparent;
-            color: #fff;
+            border-color: transparent; 
+            color: #ffffff; 
+            box-shadow: 0 4px 15px var(--primary-glow);
         }
 
         .admin-input { 
             width: 100%; 
-            padding: 16px; 
-            background: rgba(0,0,0,0.5); 
+            padding: 16px 20px; 
+            background: rgba(0,0,0,0.4); 
             color: var(--text-main); 
             border: 1px solid var(--glass-border); 
-            border-radius: 16px; 
-            margin-bottom: 12px; 
-            font-size: 14px; 
-            transition: 0.3s; 
+            border-radius: var(--border-radius-md); 
+            margin-bottom: 15px; 
+            font-size: 15px; 
+            transition: all 0.3s ease; 
             outline: none; 
         }
 
-        .admin-input:focus { border-color: var(--primary); }
+        .admin-input:focus { 
+            border-color: var(--primary); 
+            background: rgba(0,0,0,0.6);
+            box-shadow: 0 0 0 4px rgba(255, 85, 0, 0.1);
+        }
         
         .admin-btn-save { 
             background: var(--primary-grad); 
-            color: #fff; 
+            color: #ffffff; 
             border: none; 
             padding: 18px; 
-            border-radius: 16px; 
+            border-radius: var(--border-radius-md); 
             font-weight: 800; 
             width: 100%; 
             cursor: pointer; 
             text-align: center; 
             display: block; 
-            font-size: 15px; 
-            box-shadow: 0 6px 20px var(--primary-glow); 
-            transition: transform 0.2s; 
+            font-size: 16px; 
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 25px var(--primary-glow); 
+            transition: all 0.2s; 
         }
         
-        .admin-btn-save:active { transform: scale(0.97); }
+        .admin-btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--primary-glow); 
+        }
+
+        .admin-btn-save:active { 
+            transform: scale(0.96) translateY(0); 
+        }
 
         .delete-btn { 
             display: none; 
             position: absolute; 
-            top: 12px; 
-            right: 12px; 
-            background: rgba(255,68,68,0.9); 
+            top: 16px; 
+            right: 16px; 
+            background: rgba(255,50,50,0.9); 
             border: none; 
-            color: #fff; 
-            width: 28px; 
-            height: 28px; 
-            border-radius: 8px; 
+            color: #ffffff; 
+            width: 32px; 
+            height: 32px; 
+            border-radius: 10px; 
             cursor: pointer; 
             z-index: 100; 
-            font-size: 12px; 
+            font-size: 14px; 
             align-items: center; 
             justify-content: center; 
+            transition: 0.2s;
         }
         
+        .delete-btn:hover { background: rgba(255,0,0,1); transform: scale(1.1); }
         .is-admin .delete-btn { display: flex; }
 
         /* ==========================================================================
-           NEWS & POLLS
+           6. NEWS, POLLS & MEDIA
            ========================================================================== */
+        .news-date {
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .news-title {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 12px;
+            color: var(--text-main);
+            line-height: 1.3;
+        }
+
+        .news-text {
+            font-size: 16px;
+            color: var(--text-muted);
+            white-space: pre-line;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .news-media {
+            width: 100%;
+            border-radius: var(--border-radius-md);
+            margin-bottom: 20px;
+            object-fit: cover;
+            max-height: 400px;
+            border: 1px solid var(--glass-border);
+        }
+
         .news-actions { 
             display: flex; 
-            gap: 10px; 
-            margin-top: 15px; 
-            border-top: 1px solid rgba(128,128,128,0.2); 
-            padding-top: 15px; 
+            gap: 12px; 
+            margin-top: 20px; 
+            border-top: 1px solid var(--glass-border); 
+            padding-top: 20px; 
         }
         
         .news-comments-section { 
-            margin-top: 15px; 
-            background: rgba(0,0,0,0.3); 
-            border-radius: 18px; 
-            padding: 15px; 
+            margin-top: 20px; 
+            background: rgba(0,0,0,0.2); 
+            border-radius: var(--border-radius-md); 
+            padding: 20px; 
+            border: 1px solid var(--glass-border);
         }
         
         .news-comment { 
-            background: rgba(255,255,255,0.03); 
-            padding: 10px 14px; 
-            border-radius: 14px; 
+            background: rgba(255,255,255,0.02); 
+            padding: 12px 16px; 
+            border-radius: var(--border-radius-sm); 
             font-size: 14px; 
             position: relative; 
-            border-left: 2px solid var(--primary); 
-            margin-bottom:10px; 
-            color:var(--text-main); 
+            border-left: 3px solid var(--primary); 
+            margin-bottom: 12px; 
+            color: var(--text-main); 
+            line-height: 1.5;
         }
         
         .nc-name { 
-            font-size: 11px; 
+            font-size: 12px; 
             color: var(--primary); 
             font-weight: 800; 
-            margin-bottom: 4px; 
+            margin-bottom: 6px; 
         }
 
         .poll-container { 
-            margin-top: 15px; 
-            background: rgba(0,0,0,0.3); 
-            padding: 15px; 
-            border-radius: 16px; 
+            margin-top: 20px; 
+            background: rgba(0,0,0,0.4); 
+            padding: 20px; 
+            border-radius: var(--border-radius-md); 
             border: 1px solid var(--glass-border); 
         }
         
         .poll-option { 
-            background: rgba(255,255,255,0.05); 
-            padding: 10px 15px; 
-            border-radius: 10px; 
-            margin-bottom: 8px; 
+            background: rgba(255,255,255,0.03); 
+            padding: 14px 18px; 
+            border-radius: var(--border-radius-sm); 
+            margin-bottom: 10px; 
             cursor: pointer; 
-            transition: 0.2s; 
+            transition: all 0.2s ease; 
             position: relative; 
             overflow: hidden; 
+            border: 1px solid transparent;
         }
         
-        .poll-option:hover { background: rgba(255,255,255,0.1); }
+        .poll-option:hover { 
+            background: rgba(255,255,255,0.08); 
+            border-color: var(--glass-border);
+        }
         
         .poll-fill { 
             position: absolute; 
-            left: 0; 
-            top: 0; 
-            bottom: 0; 
+            left: 0; top: 0; bottom: 0; 
             background: var(--primary-glow); 
             z-index: 0; 
             width: 0%; 
-            transition: width 0.5s ease; 
+            transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); 
         }
         
         .poll-text { 
             position: relative; 
             z-index: 1; 
-            font-weight: 600; 
-            font-size: 14px; 
-            color:var(--text-main); 
-        }
-
-        /* ==========================================================================
-           FIELD & PLAYER CARDS (ULTIMATE TEAM STYLE)
-           ========================================================================== */
-        .field { 
-            background: linear-gradient(180deg, #11141a 0%, #08090d 100%); 
-            border: 2px solid var(--glass-border); 
-            border-radius: 28px; 
-            height: 520px; 
-            position: relative; 
-            overflow: hidden; 
-            box-shadow: inset 0 0 60px rgba(0,0,0,0.9); 
-            margin-top: 10px;
-        }
-        
-        .line-center { 
-            position: absolute; top: 50%; left: 0; right: 0; 
-            height: 2px; background: rgba(255,255,255,0.1); transform: translateY(-50%); 
-        }
-        
-        .circle-center { 
-            position: absolute; top: 50%; left: 50%; 
-            width: 80px; height: 80px; border: 2px solid rgba(255,255,255,0.1); 
-            border-radius: 50%; transform: translate(-50%, -50%); 
-        }
-        
-        .goal-area { 
-            position: absolute; left: 50%; width: 140px; height: 45px; 
-            border: 2px solid rgba(255,255,255,0.1); transform: translateX(-50%); 
-        }
-        
-        .goal-top { top: -2px; border-top: none; border-radius: 0 0 25px 25px; } 
-        .goal-bottom { bottom: -2px; border-bottom: none; border-radius: 25px 25px 0 0; }
-        
-        .player-card { 
-            width: 76px; 
-            height: 116px; 
-            background: rgba(0,0,0,0.6); 
-            backdrop-filter: blur(8px); 
-            border: 1px solid var(--glass-border); 
-            border-radius: 14px; 
-            position: absolute; 
-            transform: translate(-50%, -50%); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 8px 4px; 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.6); 
-            transition: all 0.2s; 
-            cursor: pointer; 
-            overflow: hidden; 
-        }
-        
-        .player-card:hover { z-index: 10; transform: translate(-50%, -50%) scale(1.1); }
-        .player-card.bench { position: relative; transform: none; flex-shrink: 0; left: 0; top: 0; margin-top: 5px; }
-        .player-card.bench:hover { transform: scale(1.1); }
-        
-        /* GOLD CARD EFFECT */
-        .card-gold { 
-            border: 2px solid #ffd700; 
-            background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(0,0,0,0.8)); 
-            box-shadow: 0 0 20px rgba(255,215,0,0.4); 
-        }
-        
-        .card-gold::after { 
-            content: ''; 
-            position: absolute; 
-            top: -50%; left: -50%; width: 200%; height: 200%; 
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%); 
-            transform: rotate(45deg); 
-            animation: shine 3s infinite; 
-            pointer-events: none; 
-        }
-        
-        @keyframes shine { 
-            0% { left: -100%; top: -100%; } 
-            20% { left: 100%; top: 100%; } 
-            100% { left: 100%; top: 100%; } 
-        }
-
-        .card-photo { 
-            width: 46px; 
-            height: 46px; 
-            background: #222; 
-            border-radius: 50%; 
-            background-size: cover; 
-            background-position: center; 
-            margin-bottom: 6px; 
-            border: 2px solid rgba(255,255,255,0.1); 
-        }
-        
-        .card-rating { 
-            font-size: 20px; 
-            font-weight: 900; 
-            color: #fff; 
-            line-height: 1; 
-            text-shadow: 0 2px 10px var(--primary-glow); 
-        }
-        
-        .card-pos { font-size: 10px; font-weight: 800; color: var(--primary); margin-bottom: 6px; margin-top: 2px; }
-        .card-name { font-size: 11px; font-weight: 700; color: var(--text-main); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
-        
-        /* Player Positioning */
-        .pos-c { top: 22%; left: 50%; } 
-        .pos-lw { top: 38%; left: 22%; } 
-        .pos-rw { top: 38%; left: 78%; } 
-        .pos-ld { top: 68%; left: 28%; } 
-        .pos-rd { top: 68%; left: 72%; } 
-        .pos-gk { top: 88%; left: 50%; }
-
-        /* ==========================================================================
-           MODALS (PROFILE, AUTH, CART)
-           ========================================================================== */
-        .social-dropdown { 
-            display: none; 
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
-            background: rgba(0,0,0,0.85); 
-            z-index: 2000; 
-            align-items: center; 
-            justify-content: center; 
-            backdrop-filter: blur(15px); 
-            padding: 20px; 
-        }
-        
-        .social-dropdown.active { display: flex; animation: scaleIn 0.2s; }
-
-        .modal-box {
-            background: var(--bg-dark); 
-            border: 1px solid var(--glass-border); 
-            border-radius: 28px; 
-            width: 100%; 
-            max-width: 360px; 
-            padding: 30px; 
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-            position: relative;
-        }
-
-        .profile-photo-large { 
-            width: 100px; 
-            height: 100px; 
-            border-radius: 50%; 
-            margin: 0 auto 15px; 
-            background-size: cover; 
-            background-position: center; 
-            border: 3px solid var(--primary); 
-            box-shadow: 0 0 20px var(--primary-glow); 
-        }
-        
-        .profile-name { font-size: 22px; font-weight: 900; color: var(--text-main); margin-bottom: 5px; }
-        .profile-pos { font-size: 14px; color: var(--primary); font-weight: 800; margin-bottom: 20px; }
-        
-        .profile-stats-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr 1fr; 
-            gap: 10px; 
-            margin-bottom: 20px; 
-        }
-        
-        .p-stat-box { 
-            background: var(--glass-bg); 
-            padding: 10px; 
-            border-radius: 12px; 
-            border: 1px solid var(--glass-border); 
-        }
-        
-        .p-stat-val { font-size: 18px; font-weight: 900; color: var(--text-main); }
-        .p-stat-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
-
-        /* Canvas Radar Chart */
-        #radarChart {
-            width: 100%;
-            height: 200px;
-            margin-bottom: 15px;
-        }
-
-        /* Cart Item Styles */
-        .cart-item {
+            font-weight: 700; 
+            font-size: 15px; 
+            color: var(--text-main); 
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            background: var(--glass-bg);
-            padding: 10px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            border: 1px solid var(--glass-border);
         }
-
-        .cart-item img {
-            width: 40px; height: 40px; border-radius: 8px; object-fit: cover;
-        }
-
-        /* ==========================================================================
-           LIVE & MATCHDAY COMPONENTS
-           ========================================================================== */
-        .live-board { 
-            background: linear-gradient(145deg, rgba(255,85,0,0.15), rgba(0,0,0,0.8)); 
-            border: 1px solid var(--primary); 
-            border-radius: 28px; 
-            padding: 30px 20px; 
-            text-align: center; 
-            margin-bottom: 24px; 
-        }
-        
-        .live-badge { 
-            display: inline-block; 
-            background: #ff0040; color: #fff; 
-            font-size: 12px; font-weight: 900; 
-            padding: 6px 16px; border-radius: 20px; 
-            text-transform: uppercase; margin-bottom: 15px; 
-            animation: pulse 1.5s infinite; 
-        }
-        
-        .live-teams { display: flex; justify-content: space-around; align-items: center; margin: 15px 0; color:var(--text-main); }
-        .live-score-big { font-size: 56px; font-weight: 900; text-shadow: 0 0 40px var(--primary-glow); color: var(--text-main); }
-
-        .checkin-panel { display: flex; gap: 10px; margin-top: 15px; justify-content: center; }
-        .checkin-btn { 
-            flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); 
-            padding: 12px; border-radius: 16px; color: var(--text-main); 
-            font-weight: 700; cursor: pointer; transition: 0.2s; 
-            display: flex; flex-direction: column; align-items: center; gap: 4px; 
-        }
-        .checkin-btn.active { background: var(--primary-grad); border-color: transparent; }
-        .checkin-count { font-size: 20px; font-weight: 900; }
-
-        /* ==========================================================================
-           SHOP & GALLERY
-           ========================================================================== */
-        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .shop-item { 
-            padding: 18px; text-align: center; display: flex; 
-            flex-direction: column; align-items: center; justify-content: center; 
-        }
-        .shop-img { 
-            width: 90px; height: 90px; margin-bottom: 15px; 
-            object-fit: contain; font-size: 60px; line-height: 90px; border-radius: 18px; 
-        }
-        
-        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .gallery-thumb { aspect-ratio: 1; border-radius: 14px; object-fit: cover; width: 100%; border: 1px solid var(--glass-border); }
-
-        /* Confetti */
-        .confetti { 
-            position: fixed; top: -10px; width: 10px; height: 10px; 
-            z-index: 9999; animation: fall linear forwards; 
-            pointer-events: none; border-radius: 2px; 
-        }
-        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
-
-        /* Chat Styles */
-        .chat-section { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 24px; padding: 20px; backdrop-filter: blur(15px); margin-top: 15px; }
-        .chat-messages { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; padding-right: 5px; }
-        .msg { display: flex; gap: 12px; align-items: flex-end; position: relative; }
-        .msg-content { background: rgba(0,0,0,0.4); padding: 12px 16px; border-radius: 16px 16px 16px 4px; border: 1px solid var(--glass-border); max-width: 85%; }
-        
-        .admin-controls { display: none; margin-top: 35px; border-top: 1px dashed rgba(128,128,128,0.3); padding-top: 25px; }
-        .is-admin .admin-controls { display: block; animation: scaleIn 0.3s; }
     </style>
 </head>
 <body>
 
-    <!-- ==========================================================================
-         TOP BAR & NAVIGATION
-         ========================================================================== -->
+    <!-- 
+        ==========================================================================
+        GLOBAL HEADER & NAVIGATION
+        ========================================================================== 
+    -->
     <div class="top-bar">
-        <div class="user-btn" onclick="openAuthModal()">👤</div>
-        <div class="notif-bell" onclick="openNotifications()">🔔<span class="badge-counter notif-badge" id="notifBadge" style="display:none;">0</span></div>
-        <div class="cart-btn" onclick="openCartModal()">🛒<span class="badge-counter" id="cartBadge" style="display:none;">0</span></div>
-        <div class="menu-burger" onclick="toggleSocialMenu()"><span></span><span></span><span></span></div>
+        <div class="action-btn-top user-btn" id="btnUserAuth" title="Профиль болельщика">👤</div>
+        <div class="action-btn-top notif-bell" id="btnNotifications" title="Уведомления">🔔<span class="badge-counter notif-badge" id="notifBadge" style="display:none;">0</span></div>
+        <div class="action-btn-top cart-btn" id="btnShoppingCart" title="Корзина">🛒<span class="badge-counter" id="cartBadge" style="display:none;">0</span></div>
+        <div class="action-btn-top menu-burger" id="btnSettingsMenu" title="Меню"><span></span><span></span><span></span></div>
         
         <header class="header">
-            <img id="mainLogoElement" src="1335.jpg" alt="ФЕНИКС" class="logo-img-main" onerror="this.src='https://ui-avatars.com/api/?name=PH&background=ff5500&color=fff'">
+            <img id="mainLogoElement" src="1335.jpg" alt="ФЕНИКС" class="logo-img-main">
         </header>
 
         <nav class="top-nav" id="mainNav">
-            <button type="button" class="tab-pill active" onclick="switchTab('news', this)">Главная</button>
-            <button type="button" class="tab-pill" onclick="switchTab('squad', this)">Состав</button>
-            <button type="button" class="tab-pill" onclick="switchTab('calendar', this)">Календарь</button>
-            <button type="button" class="tab-pill" onclick="switchTab('schedule', this)">📋 График</button>
-            <button type="button" class="tab-pill" onclick="switchTab('live', this)">🔴 Live</button>
-            <button type="button" class="tab-pill" onclick="switchTab('stats', this)">📊 Стат</button>
-            <button type="button" class="tab-pill" onclick="switchTab('predictions', this)">🎯 Прогнозы</button>
-            <button type="button" class="tab-pill" onclick="switchTab('gallery', this)">📸 Фото</button>
-            <button type="button" class="tab-pill" onclick="switchTab('shop', this)">Магазин</button>
-            <button type="button" class="tab-pill" onclick="switchTab('fame', this)">🏆 Зал Славы</button>
+            <!-- Navigation buttons will be linked via JS logic in Part 2 -->
+            <button type="button" class="tab-pill active" data-target="news">Главная</button>
+            <button type="button" class="tab-pill" data-target="fantasy" style="color:var(--primary); border-color:var(--primary);">🔮 Фэнтези</button>
+            <button type="button" class="tab-pill" data-target="squad">Состав</button>
+            <button type="button" class="tab-pill" data-target="calendar">Календарь</button>
+            <button type="button" class="tab-pill" data-target="live">🔴 Live</button>
+            <button type="button" class="tab-pill" data-target="stats">📊 Стат</button>
+            <button type="button" class="tab-pill" data-target="predictions">🎯 Прогнозы</button>
+            <button type="button" class="tab-pill" data-target="gallery">📸 Фото</button>
+            <button type="button" class="tab-pill" data-target="shop">Магазин</button>
+            <button type="button" class="tab-pill" data-target="fame">🏆 История</button>
         </nav>
     </div>
 
-    <!-- ==========================================================================
-         MODALS 
-         ========================================================================== -->
+    <!-- 
+        ==========================================================================
+        MAIN SCREENS (TABS) - Content injected via JS in Part 2 & 3
+        ========================================================================== 
+    -->
     
-    <!-- Settings & Social Modal -->
-    <div class="social-dropdown" id="socialModal" onclick="if(event.target === this) toggleSocialMenu()">
-        <div class="modal-box">
-            <div style="font-size: 18px; font-weight: 800; margin-bottom: 20px; color: var(--text-main);">Настройки & Соцсети</div>
-            <div id="socialLinksContainer" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;"></div>
-            
-            <div style="border-top: 1px solid var(--glass-border); padding-top: 15px; margin-bottom: 15px;">
-                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Тема оформления</div>
-                <div style="display:flex; gap:10px; justify-content: center;">
-                    <button onclick="setTheme('dark')" style="background:#111; color:#fff; border:1px solid #333; padding:8px 12px; border-radius:12px; cursor:pointer;">Dark</button>
-                    <button onclick="setTheme('light')" style="background:#fff; color:#111; border:1px solid #ccc; padding:8px 12px; border-radius:12px; cursor:pointer;">Light</button>
-                </div>
-            </div>
-            
-            <button type="button" style="margin-top:10px; font-size:13px; color:var(--text-muted); cursor:pointer; text-decoration:underline; background:none; border:none; font-weight:600;" onclick="openPasswordModal()">Для разработчика (Админ)</button>
-        </div>
-    </div>
-
-    <!-- Notifications Modal -->
-    <div class="social-dropdown" id="notifPanel" onclick="if(event.target===this)this.classList.remove('active')">
-        <div class="modal-box">
-            <div style="font-size: 18px; font-weight: 800; margin-bottom: 20px; color: var(--text-main);">🔔 Уведомления</div>
-            <div id="notifList" style="max-height: 400px; overflow-y: auto; text-align: left; display: flex; flex-direction: column; gap: 10px;"></div>
-            <button type="button" class="admin-btn-save" onclick="document.getElementById('notifPanel').classList.remove('active')" style="margin-top:20px;">Закрыть</button>
-        </div>
-    </div>
-
-    <!-- Dev/Admin Password Modal -->
-    <div class="social-dropdown" id="passwordModal" onclick="if(event.target === this) closePasswordModal()">
-        <form class="modal-box" onsubmit="event.preventDefault(); checkDevPassword();">
-            <div style="font-size: 18px; font-weight: 800; margin-bottom: 20px; color: var(--text-main);">🔒 Вход для разработчика</div>
-            <input type="password" id="devPassInput" class="admin-input" placeholder="Пароль" style="text-align: center;" autocomplete="off">
-            <button type="submit" class="admin-btn-save">Войти</button>
-            <button type="button" onclick="closePasswordModal()" style="margin-top:15px; width:100%; background:none; border:none; color:var(--text-muted); font-weight:bold; cursor:pointer;">Отмена</button>
-        </form>
-    </div>
-
-    <!-- Authentication Modal (New Phase 1) -->
-    <div class="social-dropdown" id="authModal" onclick="if(event.target === this) this.classList.remove('active')">
-        <div class="modal-box" id="authBox">
-            <div style="font-size: 18px; font-weight: 800; margin-bottom: 20px; color: var(--text-main);">Вход для болельщиков</div>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Войдите, чтобы копить ранги и участвовать в Фэнтези-лиге (Скоро)</p>
-            <input type="email" id="authEmail" class="admin-input" placeholder="Email" autocomplete="off">
-            <input type="password" id="authPass" class="admin-input" placeholder="Пароль" autocomplete="off">
-            <button type="button" class="admin-btn-save" onclick="handleLogin()" style="margin-bottom:10px;">Войти</button>
-            <button type="button" class="btn-action" style="width:100%; justify-content:center;" onclick="handleRegister()">Зарегистрироваться</button>
-        </div>
-        <div class="modal-box" id="profileBox" style="display:none;">
-            <div class="profile-photo-large" id="userAvatar" style="background-image: url('https://ui-avatars.com/api/?name=User&background=ff5500&color=fff');"></div>
-            <div class="profile-name" id="userDisplayName">Болельщик</div>
-            <div class="profile-pos">Ранг: Новичок</div>
-            <button type="button" class="admin-btn-save" style="background:rgba(255,68,68,0.2); color:#ff4444;" onclick="handleLogout()">Выйти</button>
-        </div>
-    </div>
-
-    <!-- Shopping Cart Modal (New Phase 1) -->
-    <div class="social-dropdown" id="cartModal" onclick="if(event.target === this) this.classList.remove('active')">
-        <div class="modal-box">
-            <div style="font-size: 18px; font-weight: 800; margin-bottom: 20px; color: var(--text-main);">🛒 Корзина</div>
-            <div id="cartItemsList" style="max-height: 250px; overflow-y: auto; text-align: left; margin-bottom: 15px;">
-                <!-- Cart items inject here -->
-            </div>
-            <div style="display:flex; justify-content:space-between; font-weight:900; color:var(--text-main); margin-bottom:15px; font-size:18px;">
-                <span>Итого:</span>
-                <span id="cartTotalSum">0 ₽</span>
-            </div>
-            <button type="button" class="admin-btn-save" onclick="checkoutCart()">Оформить заказ</button>
-        </div>
-    </div>
-
-    <!-- Player Profile Modal -->
-    <div class="social-dropdown" id="playerModal" onclick="if(event.target === this) this.classList.remove('active')">
-        <div class="profile-modal" id="playerModalContent">
-            <!-- Dynamically injected -->
-        </div>
-    </div>
-
-    <div class="ambient-glow glow-1" id="glow1"></div>
-    <div class="ambient-glow glow-2" id="glow2"></div>
-
-    <!-- ==========================================================================
-         SCREENS (TABS)
-         ========================================================================== -->
-    
-    <!-- 1. НОВОСТИ -->
+    <!-- SCREEN: NEWS (Home) -->
     <div id="screen-news" class="screen active">
-        <div id="nextMatchWidgetContainer"><div class="skeleton"></div></div>
-        <div id="newsContainer"><div class="skeleton"></div></div>
+        <div id="nextMatchWidgetContainer">
+            <div class="skeleton"></div>
+        </div>
         
+        <div id="newsContainer">
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+        </div>
+        
+        <!-- Admin Controls for News -->
         <div class="admin-controls" id="admin-news">
-            <!-- Full admin controls for news... (Same as before, unminified in JS logic) -->
+            <!-- Controls will be populated in HTML/JS later -->
         </div>
     </div>
 
-    <!-- 2. СОСТАВ -->
+    <!-- SCREEN: FANTASY LEAGUE -->
+    <div id="screen-fantasy" class="screen">
+        <div class="glass-card" style="text-align: center;">
+            <div class="skeleton" style="height: 40px; width: 60%; margin: 0 auto 20px;"></div>
+            <div class="skeleton" style="height: 380px;"></div>
+            <div class="skeleton" style="height: 150px; margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- SCREEN: SQUAD -->
     <div id="screen-squad" class="screen">
-        <div class="field" id="fieldContainer"><div class="skeleton" style="height:100%; margin:0;"></div></div>
-        <div style="font-size: 16px; font-weight: 800; margin: 25px 0 15px; color: var(--primary); text-transform: uppercase;">Запасные игроки</div>
-        <div class="bench-container" id="benchContainer" style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 20px;"></div>
-    </div>
-
-    <!-- 3. МАГАЗИН (С интеграцией корзины) -->
-    <div id="screen-shop" class="screen">
-        <div class="shop-grid" id="shopContainer"><div class="skeleton"></div><div class="skeleton"></div></div>
-        
-        <div class="admin-controls" id="admin-shop">
-            <h3 style="color:var(--primary); margin-bottom:10px;">🛠️ Добавить товар</h3>
-            <input type="text" id="sName" class="admin-input" placeholder="Название товара">
-            <input type="number" id="sPriceNum" class="admin-input" placeholder="Цена (только цифры)">
-            <input type="file" id="sImgFile" class="admin-input" accept="image/*">
-            <button type="button" class="admin-btn-save" onclick="saveShopItem()">В магазин</button>
+        <div class="glass-card" style="padding: 0; background: transparent; border: none; box-shadow: none;">
+            <div class="skeleton" style="height: 520px; border-radius: 28px;"></div>
+        </div>
+        <h3 style="color:var(--primary); margin: 20px 0; text-transform: uppercase;">Запасные</h3>
+        <div id="benchContainer" style="display: flex; gap: 15px; overflow-x: auto;">
+            <div class="skeleton" style="width: 76px; height: 116px; flex-shrink: 0;"></div>
+            <div class="skeleton" style="width: 76px; height: 116px; flex-shrink: 0;"></div>
         </div>
     </div>
 
-    <!-- Other screens logic continues here (Live, Stats, Gallery, Calendar)... -->
-    <!-- I am ensuring the structure is identical to previous, just heavily expanded and formatted -->
-
+    <!-- Placeholders for the rest of the screens to maintain valid DOM -->
+    <div id="screen-calendar" class="screen"><div class="skeleton"></div></div>
+    <div id="screen-schedule" class="screen"><div class="skeleton"></div></div>
+    <div id="screen-live" class="screen"><div class="skeleton"></div></div>
+    <div id="screen-stats" class="screen"><div class="skeleton"></div></div>
+    <div id="screen-predictions" class="screen"><div class="skeleton"></div></div>
+    <div id="screen-gallery" class="screen"><div class="skeleton"></div></div>
+    <div id="screen-shop" class="screen"><div class="skeleton"></div></div>
+    <div id="screen-fame" class="screen"><div class="skeleton"></div></div>
+ 
+    <!-- 
+        ==========================================================================
+        JAVASCRIPT CORE ENGINE (PART 2)
+        ========================================================================== 
+    -->
     <script>
         /**
          * ==========================================================================
-         * CORE INITIALIZATION & CONFIGURATION
+         * 1. FIREBASE CONFIGURATION & INITIALIZATION
          * ==========================================================================
+         * Связь с облачной базой данных, хранилищем и системой авторизации.
          */
         const firebaseConfig = {
             apiKey: "AIzaSyDsxGKTwHzLPwep_7EYiHHKAxsBwbJ-uEM", 
@@ -840,233 +599,1249 @@
             appId: "1:935773473607:web:4eecd7e05cd4ce2389da62"
         };
 
-        // Initialize Firebase
+        // Защита от повторной инициализации
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
+            console.log("[Core] Firebase инициализирован успешно.");
         }
 
         const db = firebase.database(); 
         const storage = firebase.storage();
         const auth = firebase.auth();
 
-        // Global State Objects
+        /**
+         * ==========================================================================
+         * 2. GLOBAL STATE MANAGEMENT
+         * ==========================================================================
+         * Централизованное хранилище данных приложения (Single Source of Truth).
+         */
         let isAdmin = false; 
         let currentUser = null;
-        let cart = JSON.parse(localStorage.getItem('phx_cart') || '[]');
-        let openNewsComments = {};
+        let openNewsComments = {}; // Состояние открытых комментариев для новостей
+        const fanNames = ["Болельщик", "Фанат", "Ультрас", "PhoenixFan", "Игрок"]; // Дефолтные имена
         
+        // Главный объект данных (кэш базы)
         let localData = { 
-            news: {}, matches: {}, shop: {}, players: {}, 
-            chats: {}, votes: {}, social: null, nextMatch: null, 
-            design: null, stats: {}, goalieStats: {}, fame: {}, 
-            liveMatch: null, schedule: {}, predictions: {}, 
-            gallery: {}, standings: {} 
+            news: {}, 
+            players: {}, 
+            nextMatch: null, 
+            design: null, 
+            social: null 
+            // Остальные узлы (stats, shop, fantasy) подтянутся в Части 3
         };
 
         /**
+         * Подписка на базовые узлы БД (Новостная лента, Состав, Дизайн).
+         * Данные обновляются в реальном времени у всех пользователей.
+         */
+        const coreRefs = ['news', 'players', 'nextMatch', 'design', 'social'];
+        coreRefs.forEach(ref => {
+            db.ref(ref).on('value', snap => { 
+                localData[ref] = snap.val() || null; 
+                console.log(`[DB Sync] Обновлен узел: ${ref}`);
+                renderCoreUI(); 
+            });
+        });
+
+        /**
          * ==========================================================================
-         * NEW MODULE: SHOPPING CART (PHASE 1)
+         * 3. NAVIGATION & UI CONTROLS
          * ==========================================================================
          */
         
         /**
-         * Adds an item to the local shopping cart
-         * @param {string} id - The item ID from Firebase
-         * @param {string} name - Item name
-         * @param {number} price - Item price
-         * @param {string} img - Item image URL
+         * Переключение вкладок (Экранов)
+         * @param {string} tabId - ID целевого экрана (например, 'news', 'squad')
+         * @param {HTMLElement} btn - Нажатая кнопка
          */
-        window.addToCart = function(id, name, price, img) {
-            cart.push({ id, name, price: parseInt(price) || 0, img });
-            localStorage.setItem('phx_cart', JSON.stringify(cart));
-            updateCartBadge();
-            alert(`"${name}" добавлено в корзину!`);
-        }
-
-        function updateCartBadge() {
-            const badge = document.getElementById('cartBadge');
-            if (cart.length > 0) {
-                badge.style.display = 'flex';
-                badge.innerText = cart.length;
-            } else {
-                badge.style.display = 'none';
+        function switchTab(tabId, btn) { 
+            try {
+                // Скрываем все экраны
+                document.querySelectorAll('.screen').forEach(s => {
+                    s.classList.remove('active');
+                }); 
+                
+                // Показываем нужный экран
+                const targetScreen = document.getElementById('screen-' + tabId);
+                if (targetScreen) targetScreen.classList.add('active'); 
+                
+                // Обновляем состояние кнопок навигации
+                document.querySelectorAll('.tab-pill').forEach(b => {
+                    b.classList.remove('active');
+                    // Сброс специфичных стилей (например, для Фэнтези)
+                    if (b.dataset.target === 'fantasy') {
+                        b.style.color = 'var(--primary)'; 
+                        b.style.borderColor = 'var(--primary)';
+                    }
+                }); 
+                
+                btn.classList.add('active');
+                
+                // Убираем цветные рамки у Фэнтези, если она активна
+                if (tabId === 'fantasy') {
+                    btn.style.color = '#fff';
+                    btn.style.borderColor = 'transparent';
+                }
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (error) {
+                console.error("[Navigation Error]", error);
             }
         }
 
-        window.openCartModal = function() {
-            document.getElementById('cartModal').classList.add('active');
-            renderCart();
+        // Подключаем слушатели для кнопок меню из Части 1
+        document.getElementById('mainNav').addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON' && e.target.classList.contains('tab-pill')) {
+                switchTab(e.target.dataset.target, e.target);
+            }
+        });
+
+        // Слушатели верхних кнопок (Модалки)
+        document.getElementById('btnSettingsMenu').onclick = () => document.getElementById('socialModal').classList.toggle('active');
+        document.getElementById('btnUserAuth').onclick = () => document.getElementById('authModal').classList.add('active');
+        // Заглушки для уведомлений и корзины (логика в Части 3)
+        document.getElementById('btnNotifications').onclick = () => alert("Уведомления будут доступны в следующей части!");
+        document.getElementById('btnShoppingCart').onclick = () => alert("Корзина будет доступна в следующей части!");
+
+        // Закрытие модалок при клике вне их области
+        window.onclick = function(event) {
+            if (event.target.classList.contains('social-dropdown')) {
+                event.target.classList.remove('active');
+            }
         }
 
-        function renderCart() {
-            const container = document.getElementById('cartItemsList');
-            const totalEl = document.getElementById('cartTotalSum');
+        // Установка темы оформления
+        function setTheme(themeName) { 
+            document.body.setAttribute('data-theme', themeName); 
+            localStorage.setItem('phx_theme', themeName); 
+            console.log(`[UI] Применена тема: ${themeName}`);
+        }
+        if (localStorage.getItem('phx_theme')) {
+            setTheme(localStorage.getItem('phx_theme'));
+        }
+
+        /**
+         * ==========================================================================
+         * 4. AUTHENTICATION ENGINE (Firebase Auth)
+         * ==========================================================================
+         */
+
+        /**
+         * Слушатель изменения состояния авторизации.
+         * Вызывается автоматически при входе/выходе или при загрузке приложения.
+         */
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            const authBox = document.getElementById('authBox');
+            const profileBox = document.getElementById('profileBox');
             
-            if (cart.length === 0) {
-                container.innerHTML = '<div style="color:var(--text-muted); text-align:center;">Корзина пуста</div>';
-                totalEl.innerText = '0 ₽';
+            if (user) {
+                console.log("[Auth] Пользователь авторизован:", user.email);
+                if (authBox) authBox.style.display = 'none';
+                if (profileBox) profileBox.style.display = 'block';
+                
+                // Формируем имя пользователя из email
+                let displayName = user.email.split('@')[0];
+                document.getElementById('userDisplayName').innerText = displayName;
+                document.getElementById('userAvatar').style.backgroundImage = `url('https://ui-avatars.com/api/?name=${displayName}&background=ff5500&color=fff')`;
+                
+                // Меняем цвет иконки профиля в шапке
+                document.getElementById('btnUserAuth').style.color = 'var(--primary)';
+                document.getElementById('btnUserAuth').style.borderColor = 'var(--primary)';
+            } else {
+                console.log("[Auth] Пользователь не авторизован.");
+                if (authBox) authBox.style.display = 'block';
+                if (profileBox) profileBox.style.display = 'none';
+                
+                document.getElementById('btnUserAuth').style.color = 'var(--text-main)';
+                document.getElementById('btnUserAuth').style.borderColor = 'var(--glass-border)';
+            }
+        });
+
+        window.handleLogin = function() {
+            const email = document.getElementById('authEmail').value.trim();
+            const pass = document.getElementById('authPass').value;
+            
+            if (!email || !pass) return alert("Введите Email и пароль!");
+            
+            auth.signInWithEmailAndPassword(email, pass)
+                .then(() => alert("С возвращением!"))
+                .catch(err => alert("Ошибка входа: " + err.message));
+        }
+
+        window.handleRegister = function() {
+            const email = document.getElementById('authEmail').value.trim();
+            const pass = document.getElementById('authPass').value;
+            
+            if (!email || !pass) return alert("Введите Email и пароль!");
+            if (pass.length < 6) return alert("Пароль должен быть минимум 6 символов.");
+            
+            auth.createUserWithEmailAndPassword(email, pass)
+                .then(() => alert("Регистрация успешна! Добро пожаловать в команду Феникс."))
+                .catch(err => alert("Ошибка регистрации: " + err.message));
+        }
+
+        window.handleLogout = function() { 
+            auth.signOut().then(() => alert("Вы успешно вышли из профиля.")); 
+        }
+
+        /**
+         * ==========================================================================
+         * 5. FILE UPLOAD ENGINE (Firebase Storage)
+         * ==========================================================================
+         */
+        
+        /**
+         * Асинхронно загружает файл в Firebase Storage и возвращает прямую ссылку.
+         * Защита от тяжелых файлов (> 5 МБ).
+         * @param {string} inputId - ID элемента <input type="file">
+         * @returns {Promise<string>} - URL загруженного изображения или пустая строка
+         */
+        async function processFilePromise(inputId) {
+            return new Promise((resolve, reject) => {
+                let fileInput = document.getElementById(inputId);
+                
+                if (!fileInput || !fileInput.files[0]) { 
+                    resolve(""); // Файл не выбран, возвращаем пустоту
+                    return; 
+                }
+                
+                let file = fileInput.files[0];
+                
+                // Проверка лимита (5 MB = 5 * 1024 * 1024 bytes)
+                const MAX_SIZE = 5 * 1024 * 1024;
+                if (file.size > MAX_SIZE) { 
+                    alert("Ошибка: Файл слишком большой! Максимальный размер 5 МБ."); 
+                    resolve(""); 
+                    return; 
+                }
+                
+                // Формируем уникальное имя файла
+                const uniqueFileName = 'uploads/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.]/g, '');
+                const storageRef = storage.ref(uniqueFileName); 
+                
+                console.log(`[Storage] Начало загрузки файла: ${uniqueFileName}`);
+                const uploadTask = storageRef.put(file);
+                
+                uploadTask.on('state_changed', 
+                    (snapshot) => {
+                        // Опционально: можно добавить расчет прогресса (progress bar)
+                        // const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    }, 
+                    (error) => { 
+                        console.error("[Storage Error]", error);
+                        alert("Ошибка загрузки файла.");
+                        resolve(""); 
+                    }, 
+                    () => { 
+                        // Успешная загрузка, получаем URL
+                        uploadTask.snapshot.ref.getDownloadURL().then((url) => {
+                            console.log("[Storage] Файл успешно загружен:", url);
+                            resolve(url);
+                        }); 
+                    }
+                );
+            });
+        }
+
+        /**
+         * ==========================================================================
+         * 6. RENDERING ENGINE (Core UI)
+         * ==========================================================================
+         * Функции для отрисовки HTML на основе данных из базы localData.
+         */
+        
+        function renderCoreUI() {
+            renderDesignSettings();
+            renderNextMatch();
+            renderNews();
+            renderSquad();
+        }
+
+        /**
+         * Отрисовка общих настроек дизайна (Цвета, Логотип)
+         */
+        function renderDesignSettings() {
+            const des = localData.design || { color: "#ff5500", bg: "", logo: "1335.jpg" };
+            
+            // Применяем CSS переменные
+            document.documentElement.style.setProperty('--primary', des.color); 
+            document.getElementById('glow1').style.background = des.color + '88'; 
+            document.getElementById('glow2').style.background = des.color + '88';
+            
+            // Кастомный фон, если установлен
+            if(des.bg && des.bg !== "") { 
+                document.body.style.backgroundImage = `url('${des.bg}')`; 
+                document.body.style.backgroundColor = 'transparent'; 
+            } else { 
+                document.body.style.backgroundImage = 'none'; 
+            }
+            
+            // Логотип клуба
+            const logoEl = document.getElementById('mainLogoElement');
+            if(logoEl) logoEl.src = des.logo || '1335.jpg';
+        }
+
+        /**
+         * Отрисовка виджета "Ближайший матч" (Top of News Screen)
+         */
+        function renderNextMatch() {
+            const nm = localData.nextMatch; 
+            const container = document.getElementById('nextMatchWidgetContainer');
+            
+            if(!container) return;
+
+            if(nm) {
+                let dateStr = "Дата не указана";
+                if (nm.date) {
+                    const d = new Date(nm.date);
+                    if (!isNaN(d.getTime())) {
+                        dateStr = d.toLocaleString('ru-RU', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+                    }
+                }
+                
+                let myLogo = localData.design?.logo || '1335.jpg';
+                let oppLogo = nm.logo || 'https://ui-avatars.com/api/?name=' + (nm.opponent || 'OPP') + '&background=222&color=fff';
+                
+                // Кнопка удаления для админа
+                let delBtn = isAdmin ? `<button type="button" class="delete-btn" onclick="db.ref('nextMatch').remove()">✖</button>` : '';
+
+                container.innerHTML = `
+                    <div class="next-match-widget">
+                        ${delBtn}
+                        <div style="font-size: 11px; text-transform: uppercase; color: var(--primary); font-weight: 800; margin-bottom: 12px; display: flex; justify-content: space-between;">
+                            <span>🔥 Ближайший матч</span>
+                            <span>${dateStr}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 12px; font-weight: 800; color:#fff;">
+                                <div class="nm-logo"><img src="${myLogo}"></div>
+                                <span>Феникс</span>
+                            </div>
+                            <div style="font-weight: 900; color: var(--primary);">VS</div>
+                            <div style="display: flex; align-items: center; gap: 12px; font-weight: 800; color:#fff;">
+                                <span>${nm.opponent || 'Соперник'}</span>
+                                <div class="nm-logo"><img src="${oppLogo}"></div>
+                            </div>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:10px; text-align:center;">
+                            📍 ${nm.arena || 'Арена не указана'}
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = '';
+            }
+        }
+
+        /**
+         * Отрисовка Новостной ленты (Posts, Media, Polls, Comments)
+         */
+        function renderNews() {
+            const container = document.getElementById('newsContainer');
+            if(!container) return;
+
+            const newsData = localData.news || {};
+            const newsEntries = Object.entries(newsData).reverse(); // Свежие новости сверху
+
+            if(newsEntries.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:40px 0;">Новостей пока нет</div>';
                 return;
             }
 
             let html = '';
-            let total = 0;
+            
+            newsEntries.forEach(([id, post]) => {
+                let mediaHtml = '';
+                let pollHtml = '';
+                
+                // 1. Рендер Видео
+                if(post.video) {
+                    if(post.video.includes('youtu')) { 
+                        // Извлекаем ID Youtube видео
+                        let vId = post.video.includes('v=') ? post.video.split('v=')[1] : post.video.split('youtu.be/')[1];
+                        if(vId) vId = vId.split('&')[0];
+                        mediaHtml = `<iframe class="news-media" src="https://www.youtube.com/embed/${vId}" frameborder="0" allowfullscreen></iframe>`; 
+                    } else {
+                        mediaHtml = `<video class="news-media" controls><source src="${post.video}"></video>`;
+                    }
+                }
 
-            cart.forEach((item, index) => {
-                total += item.price;
-                html += `
-                    <div class="cart-item">
-                        <img src="${item.img}" onerror="this.src='1335.jpg'">
-                        <div style="flex-grow:1; margin-left:10px;">
-                            <div style="font-weight:700; font-size:14px; color:var(--text-main);">${item.name}</div>
-                            <div style="color:var(--primary); font-weight:800;">${item.price} ₽</div>
+                // 2. Рендер Опросов
+                if(post.pollOptions && post.pollOptions.length > 0) {
+                    let totalVotes = 0; 
+                    let votes = post.pollVotes || {}; 
+                    Object.values(votes).forEach(v => totalVotes += v);
+                    
+                    pollHtml = `<div class="poll-container"><div style="color:var(--primary); font-weight:800; margin-bottom:15px;">📊 Опрос</div>`;
+                    
+                    post.pollOptions.forEach((opt, idx) => { 
+                        let pct = totalVotes === 0 ? 0 : Math.round(((votes[idx]||0)/totalVotes)*100); 
+                        pollHtml += `
+                            <div class="poll-option" onclick="votePoll('${id}', ${idx})">
+                                <div class="poll-fill" style="width: ${pct}%"></div>
+                                <div class="poll-text"><span>${opt}</span><span>${pct}%</span></div>
+                            </div>
+                        `; 
+                    }); 
+                    pollHtml += `</div>`;
+                }
+
+                // 3. Рендер Комментариев
+                let commentsObj = post.comments || {}; 
+                let commentsHtml = Object.entries(commentsObj).map(([cId, c]) => `
+                    <div class="news-comment">
+                        <div class="nc-name">${c.name}</div>
+                        <div>${c.text}</div>
+                        ${isAdmin ? `<span class="delete-btn" style="top:5px;right:5px;width:20px;height:20px;font-size:10px;" onclick="db.ref('news/${id}/comments/${cId}').remove()">✖</span>` : ''}
+                    </div>
+                `).join('');
+                
+                let interactionPanel = `
+                    <div class="news-actions">
+                        <button type="button" class="btn-action" style="margin-top:0;" onclick="likeNews('${id}')">❤️ ${post.likes||0}</button>
+                        <button type="button" class="btn-action" style="margin-top:0;" onclick="toggleNewsComments('${id}')">💬 ${Object.keys(commentsObj).length}</button>
+                    </div>
+                    <div class="news-comments-section" style="display: ${openNewsComments[id] ? 'block' : 'none'};">
+                        <div style="max-height:250px;overflow-y:auto;margin-bottom:15px;padding-right:5px;">
+                            ${commentsHtml || '<div style="color:var(--text-muted);font-size:13px;">Будьте первым, кто оставит комментарий!</div>'}
                         </div>
-                        <div style="color:#ff4444; font-weight:bold; cursor:pointer; font-size:18px;" onclick="removeFromCart(${index})">×</div>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="nc-input-${id}" placeholder="Ваш комментарий..." class="admin-input" style="margin:0; padding:12px;">
+                            <button type="button" class="admin-btn-save" style="width:50px; padding:0; display:flex; align-items:center; justify-content:center;" onclick="sendNewsComment('${id}')">➤</button>
+                        </div>
+                    </div>
+                `;
+
+                // 4. Основная картинка
+                let imgHtml = post.img ? `<img src="${post.img}" class="news-media" loading="lazy">` : '';
+                
+                // 5. Кнопка удаления
+                let delBtn = isAdmin ? `<button type="button" class="delete-btn" onclick="db.ref('news/${id}').remove()">✖</button>` : '';
+
+                // Сборка поста
+                html += `
+                    <div class="glass-card">
+                        ${delBtn}
+                        ${imgHtml}
+                        <div class="news-date">${post.date || ''}</div>
+                        <div class="news-title">${post.title || 'Без заголовка'}</div>
+                        <div class="news-text">${post.text || ''}</div>
+                        ${mediaHtml}
+                        ${pollHtml}
+                        ${interactionPanel}
                     </div>
                 `;
             });
 
             container.innerHTML = html;
-            totalEl.innerText = `${total} ₽`;
         }
-
-        window.removeFromCart = function(index) {
-            cart.splice(index, 1);
-            localStorage.setItem('phx_cart', JSON.stringify(cart));
-            renderCart();
-            updateCartBadge();
-        }
-
-        window.checkoutCart = function() {
-            if(cart.length === 0) return alert("Сперва добавьте товары!");
-            alert("Функция оплаты будет доступна в следующем обновлении (Phase 2).");
-        }
-
-        // Initialize Cart UI on load
-        updateCartBadge();
 
         /**
-         * ==========================================================================
-         * NEW MODULE: AUTHENTICATION (PHASE 1)
-         * ==========================================================================
+         * Вспомогательные функции новостей (Лайки, Голосование, Комменты)
          */
-        
-        window.openAuthModal = function() {
-            document.getElementById('authModal').classList.add('active');
+        window.votePoll = function(newsId, optionIndex) {
+            let voted = JSON.parse(localStorage.getItem('phx_voted_polls') || '{}'); 
+            if(voted[newsId]) return alert("Вы уже голосовали в этом опросе!");
+            
+            let currentVotes = localData.news[newsId].pollVotes || {}; 
+            currentVotes[optionIndex] = (currentVotes[optionIndex] || 0) + 1;
+            
+            db.ref(`news/${newsId}/pollVotes`).set(currentVotes); 
+            voted[newsId] = true; 
+            localStorage.setItem('phx_voted_polls', JSON.stringify(voted));
         }
 
-        auth.onAuthStateChanged(user => {
-            currentUser = user;
-            if (user) {
-                document.getElementById('authBox').style.display = 'none';
-                document.getElementById('profileBox').style.display = 'block';
-                document.getElementById('userDisplayName').innerText = user.email.split('@')[0];
-            } else {
-                document.getElementById('authBox').style.display = 'block';
-                document.getElementById('profileBox').style.display = 'none';
+        window.likeNews = function(id) {
+            let likedArray = JSON.parse(localStorage.getItem('phx_liked_news') || '[]'); 
+            if(likedArray.includes(id)) return alert("Вы уже оценили эту новость!");
+            
+            let currentLikes = (localData.news[id] && localData.news[id].likes) ? localData.news[id].likes : 0;
+            db.ref(`news/${id}/likes`).set(currentLikes + 1); 
+            
+            likedArray.push(id); 
+            localStorage.setItem('phx_liked_news', JSON.stringify(likedArray));
+        }
+
+        window.toggleNewsComments = function(id) { 
+            openNewsComments[id] = !openNewsComments[id]; 
+            renderNews(); // Перерисовываем только новости
+        }
+
+        window.sendNewsComment = function(id) {
+            let input = document.getElementById(`nc-input-${id}`);
+            if(input && input.value.trim()) { 
+                // Выбираем случайное имя, если юзер не авторизован
+                let authorName = currentUser ? currentUser.email.split('@')[0] : (fanNames[Math.floor(Math.random() * fanNames.length)] + Math.floor(Math.random() * 99));
+                
+                db.ref(`news/${id}/comments`).push({ 
+                    name: authorName, 
+                    text: input.value.trim() 
+                }); 
+                input.value = ''; 
+                openNewsComments[id] = true; 
             }
+        }
+
+        /**
+         * Отрисовка состава команды (Поле и Замена)
+         */
+        function renderSquad() {
+            let field = document.getElementById('fieldContainer'); 
+            let bench = document.getElementById('benchContainer'); 
+            
+            if(!field || !bench) return;
+
+            // Восстанавливаем разметку хоккейной коробки
+            field.innerHTML = `
+                <div class="line-center"></div>
+                <div class="circle-center"></div>
+                <div class="goal-area goal-top"></div>
+                <div class="goal-area goal-bottom"></div>
+            `; 
+            bench.innerHTML = '';
+
+            const playersData = localData.players || {};
+            
+            Object.entries(playersData).forEach(([id, p]) => {
+                // Если картинки нет, генерируем аватар с инициалами
+                let bg = p.photo ? `url('${p.photo}')` : `url('https://ui-avatars.com/api/?name=${p.name}&background=111&color=fff')`;
+                
+                // Классы карточки: позиция на поле или запасной. + золотое свечение
+                let cardClass = `player-card ${id.startsWith('pos-') ? id : 'bench'} ${p.isStar ? 'card-gold' : ''}`;
+                
+                let card = document.createElement('div'); 
+                card.className = cardClass;
+                
+                let delBtn = isAdmin ? `<button type="button" class="delete-btn" style="width:22px;height:22px;top:-5px;right:-5px;" onclick="db.ref('players/${id}').remove(); event.stopPropagation();">✖</button>` : '';
+
+                card.innerHTML = `
+                    ${delBtn}
+                    <div class="card-rating">${p.baseRating || 50}</div>
+                    <div class="card-pos">${p.posName || 'ИГР'}</div>
+                    <div class="card-photo" style="background-image: ${bg}"></div>
+                    <div class="card-name">${p.name || 'Неизвестно'}</div>
+                `;
+                
+                // При клике открываем профиль (логика профиля будет расширена в след частях)
+                card.onclick = () => {
+                    alert(`Профиль игрока: ${p.name}. Полная статистика появится в Части 3.`);
+                }; 
+                
+                // Распределяем карточки
+                if(id.startsWith('pos-')) {
+                    field.appendChild(card);
+                } else {
+                    bench.appendChild(card);
+                }
+            });
+        }
+
+                /**
+         * ==========================================================================
+         * 7. EXTENDED DATA SUBSCRIPTION (PART 3)
+         * ==========================================================================
+         * Подписываемся на оставшиеся узлы базы данных для работы модулей из Части 3.
+         */
+        const extendedRefs = [
+            'matches', 'schedule', 'stats', 'goalieStats', 'standings', 
+            'predictions', 'gallery', 'shop', 'fame', 'liveMatch', 'chats'
+        ];
+        
+        extendedRefs.forEach(ref => {
+            db.ref(ref).on('value', snap => { 
+                localData[ref] = snap.val() || null; 
+                console.log(`[DB Sync] Обновлен модуль: ${ref}`);
+                renderExtendedUI(); 
+            });
         });
 
-        window.handleLogin = function() {
-            const email = document.getElementById('authEmail').value;
-            const pass = document.getElementById('authPass').value;
-            auth.signInWithEmailAndPassword(email, pass)
-                .then(() => alert("Успешный вход!"))
-                .catch(err => alert("Ошибка: " + err.message));
-        }
-
-        window.handleRegister = function() {
-            const email = document.getElementById('authEmail').value;
-            const pass = document.getElementById('authPass').value;
-            auth.createUserWithEmailAndPassword(email, pass)
-                .then(() => alert("Регистрация успешна! Добро пожаловать в семью."))
-                .catch(err => alert("Ошибка: " + err.message));
-        }
-
-        window.handleLogout = function() {
-            auth.signOut().then(() => alert("Вы вышли из профиля."));
+        function renderExtendedUI() {
+            try {
+                renderShop();
+                renderCalendar();
+                renderSchedule();
+                renderStats();
+                renderPredictions();
+                renderGallery();
+                renderFame();
+                renderLiveMatch();
+                // Фэнтези-пул рендерится отдельно, так как зависит от действий юзера
+            } catch (error) {
+                console.error("[Render Error] Ошибка в отрисовке расширенных модулей:", error);
+            }
         }
 
         /**
          * ==========================================================================
-         * RADAR CHART LOGIC (HTML5 CANVAS) FOR PLAYER PROFILES
+         * 8. FANTASY LEAGUE ENGINE
          * ==========================================================================
          */
-        function drawRadarChart(canvasId, stats) {
-            const canvas = document.getElementById(canvasId);
-            if(!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radius = Math.min(centerX, centerY) - 20;
-
-            const labels = ['Скорость', 'Бросок', 'Пас', 'Защита', 'Сила'];
-            const sides = labels.length;
-            const angleStep = (Math.PI * 2) / sides;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw Background Web
-            ctx.beginPath();
-            for (let i = 0; i < sides; i++) {
-                const x = centerX + radius * Math.cos(i * angleStep - Math.PI/2);
-                const y = centerY + radius * Math.sin(i * angleStep - Math.PI/2);
-                ctx.lineTo(x, y);
+        const FANTASY_MAX_BUDGET = 100.0;
+        let fantasyState = {
+            budget: FANTASY_MAX_BUDGET,
+            activeFilter: null,
+            squad: {
+                'pos-lw': null, 'pos-c': null, 'pos-rw': null,
+                'pos-ld': null, 'pos-rd': null, 'pos-gk': null
             }
-            ctx.closePath();
-            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-            ctx.stroke();
+        };
 
-            // Draw Data Polygon
-            ctx.beginPath();
-            for (let i = 0; i < sides; i++) {
-                // Normalize stat (assuming max 99)
-                const val = (stats[i] || 50) / 99;
-                const r = radius * val;
-                const x = centerX + r * Math.cos(i * angleStep - Math.PI/2);
-                const y = centerY + r * Math.sin(i * angleStep - Math.PI/2);
-                ctx.lineTo(x, y);
-            }
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(255, 85, 0, 0.4)';
-            ctx.fill();
-            ctx.strokeStyle = '#ff5500';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+        const posNamesDisplay = {
+            'pos-lw': 'Левый Нападающий', 'pos-c': 'Центр', 'pos-rw': 'Правый Нападающий',
+            'pos-ld': 'Левый Защитник', 'pos-rd': 'Правый Защитник', 'pos-gk': 'Вратарь'
+        };
+
+        /**
+         * Расчет виртуальной стоимости игрока на основе его рейтинга
+         */
+        function calculatePlayerPrice(rating) {
+            let base = parseInt(rating) || 50;
+            // Пример формулы: рейтинг 80 = 20 млн, рейтинг 90 = 25 млн
+            let price = (base - 40) * 0.5;
+            return Math.max(5.0, price).toFixed(1);
         }
 
-        // Expanded Profile Modal with Canvas
-        window.openPlayerModal = function(id) {
-            const p = localData.players[id]; 
-            if(!p) return;
-            const content = document.getElementById('playerModalContent');
-            let bg = p.photo ? `url('${p.photo}')` : `url('https://ui-avatars.com/api/?name=${p.name}&background=111&color=fff')`;
+        window.selectFantasyPos = function(posId) {
+            fantasyState.activeFilter = posId;
+            const draftPosTitle = document.getElementById('currentDraftPos');
+            if(draftPosTitle) draftPosTitle.innerText = posNamesDisplay[posId];
             
-            // Generate dummy stats based on rating for the radar chart (Phase 2 will sync to DB)
-            const base = p.baseRating || 50;
-            const radarStats = [base, base-5, base+5, base-10, base+2];
+            // Подсветка активного слота на площадке
+            document.querySelectorAll('.fantasy-slot').forEach(el => el.style.borderColor = 'var(--glass-border)');
+            const activeSlot = document.getElementById(`f-slot-${posId.split('-')[1]}`);
+            if(activeSlot) activeSlot.style.borderColor = 'var(--primary)';
+            
+            renderFantasyPool();
+        }
 
-            content.innerHTML = `
-                <div class="profile-photo-large" style="background-image: ${bg}"></div>
-                <div class="profile-name">${p.name}</div>
-                <div class="profile-pos">${p.posName} | Рейтинг: ${p.baseRating}</div>
+        function renderFantasyPool() {
+            const poolContainer = document.getElementById('fantasyPlayerPool');
+            if(!poolContainer) return;
+            poolContainer.innerHTML = '';
+
+            let playersArr = Object.entries(localData.players || {});
+            
+            // Фильтрация игроков по выбранной позиции (основа + запасные)
+            if(fantasyState.activeFilter) {
+                playersArr = playersArr.filter(([id, p]) => {
+                    return id === fantasyState.activeFilter || id.includes('bench');
+                });
+            }
+
+            if(playersArr.length === 0) {
+                poolContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Выберите позицию на льду или нет доступных игроков.</div>';
+                return;
+            }
+
+            playersArr.forEach(([id, p]) => {
+                // Если игрок уже в составе, не выводим его в список
+                let isAlreadyDrafted = Object.values(fantasyState.squad).some(s => s && s.id === id);
+                if(isAlreadyDrafted) return;
+
+                let price = parseFloat(calculatePlayerPrice(p.baseRating));
+                let canAfford = fantasyState.budget >= price;
+                let bg = p.photo ? `url('${p.photo}')` : `url('https://ui-avatars.com/api/?name=${p.name}&background=111&color=fff')`;
+
+                let row = document.createElement('div');
+                row.className = 'fantasy-player-row';
+                row.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:40px; height:40px; border-radius:50%; background-image:${bg}; background-size:cover;"></div>
+                        <div class="fp-info">
+                            <span class="fp-name">${p.name}</span>
+                            <span class="fp-meta">Рейтинг: ${p.baseRating || 50} | ${p.posName}</span>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <span class="fp-price" style="color:${canAfford ? 'var(--primary)' : '#ff4444'}">${price}M</span>
+                        <button class="fp-add-btn" ${!canAfford ? 'disabled' : ''} onclick="draftPlayer('${id}', '${p.name}', '${p.photo}', ${price})">+</button>
+                    </div>
+                `;
+                poolContainer.appendChild(row);
+            });
+        }
+
+        window.draftPlayer = function(playerId, name, photo, price) {
+            if(!fantasyState.activeFilter) return alert("Сначала выберите позицию на площадке!");
+            
+            let slot = fantasyState.activeFilter;
+            
+            // Если слот занят, возвращаем деньги за старого игрока
+            if(fantasyState.squad[slot]) {
+                fantasyState.budget += fantasyState.squad[slot].price;
+            }
+
+            if(fantasyState.budget < price) return alert("Не хватает бюджета!");
+
+            // Добавляем нового
+            fantasyState.squad[slot] = { id: playerId, name: name, photo: photo, price: price };
+            fantasyState.budget -= price;
+            
+            updateFantasyUI();
+        }
+
+        window.removeDraftedPlayer = function(slot, event) {
+            event.stopPropagation(); 
+            if(fantasyState.squad[slot]) {
+                fantasyState.budget += fantasyState.squad[slot].price;
+                fantasyState.squad[slot] = null;
+                updateFantasyUI();
+            }
+        }
+
+        function updateFantasyUI() {
+            const bEl = document.getElementById('fantasyBudgetVal');
+            if(bEl) {
+                bEl.innerText = fantasyState.budget.toFixed(1);
+                bEl.className = fantasyState.budget < 10 ? 'danger' : (fantasyState.budget < 30 ? 'warning' : '');
+            }
+
+            Object.keys(fantasyState.squad).forEach(slot => {
+                let slotId = `f-slot-${slot.split('-')[1]}`;
+                let el = document.getElementById(slotId);
+                let p = fantasyState.squad[slot];
                 
-                <canvas id="radarChart" width="300" height="200"></canvas>
+                if(el) {
+                    if(p) {
+                        let bg = p.photo ? `url('${p.photo}')` : `url('https://ui-avatars.com/api/?name=${p.name}&background=111&color=fff')`;
+                        el.classList.add('filled');
+                        el.innerHTML = `
+                            <div class="remove-icon" onclick="removeDraftedPlayer('${slot}', event)">✕</div>
+                            <div style="width:36px; height:36px; border-radius:50%; background-image:${bg}; background-size:cover; margin-bottom:4px; border:1px solid var(--primary);"></div>
+                            <div style="font-size:9px; color:#fff; text-overflow:ellipsis; overflow:hidden; width:100%; text-align:center; white-space:nowrap;">${p.name}</div>
+                        `;
+                    } else {
+                        el.classList.remove('filled');
+                        let labels = {'pos-lw':'ЛН', 'pos-c':'ЦН', 'pos-rw':'ПН', 'pos-ld':'ЛЗ', 'pos-rd':'ПЗ', 'pos-gk':'ВР'};
+                        el.innerHTML = labels[slot];
+                    }
+                }
+            });
+            renderFantasyPool();
+        }
+
+        window.saveFantasyTeam = function() {
+            if(!currentUser) {
+                openAuthModal();
+                return alert("Необходимо войти в аккаунт, чтобы заявить команду!");
+            }
+            let isFull = Object.values(fantasyState.squad).every(p => p !== null);
+            if(!isFull) return alert("Соберите полную пятерку и вратаря!");
+
+            db.ref(`fantasyTeams/${currentUser.uid}`).set({
+                managerEmail: currentUser.email,
+                squad: fantasyState.squad,
+                points: 0,
+                timestamp: Date.now()
+            }).then(() => {
+                alert("Команда успешно заявлена! Ожидайте начисления очков после реальных матчей.");
+                // Имитация конфетти (функция из Части 4)
+                if(typeof fireConfetti === 'function') fireConfetti(); 
+            }).catch(err => alert("Ошибка сохранения: " + err.message));
+        }
+
+        /**
+         * ==========================================================================
+         * 9. SHOP & CART ENGINE
+         * ==========================================================================
+         */
+        function renderShop() {
+            const container = document.getElementById('shopContainer');
+            if(!container) return;
+            
+            const shopItems = Object.entries(localData.shop || {});
+            if(shopItems.length === 0) {
+                container.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--text-muted);">Товаров пока нет</div>';
+                return;
+            }
+
+            container.innerHTML = shopItems.map(([id, s]) => {
+                let imgHtml = (s.img.startsWith('http') || s.img.startsWith('data:')) 
+                    ? `<img src="${s.img}" class="shop-img">` 
+                    : `<div class="shop-img">${s.img}</div>`; // Fallback для эмодзи
                 
-                <button type="button" class="admin-btn-save" onclick="document.getElementById('playerModal').classList.remove('active')">Закрыть</button>
+                let delBtn = isAdmin ? `<button type="button" class="delete-btn" onclick="db.ref('shop/${id}').remove()">✖</button>` : '';
+
+                return `
+                    <div class="glass-card shop-item" style="margin-bottom:0; padding:15px;">
+                        ${delBtn}
+                        ${imgHtml}
+                        <div style="font-size:14px; font-weight:800; margin-bottom:8px; color:var(--text-main);">${s.name}</div>
+                        <div style="font-size:18px; font-weight:900; color:var(--primary); margin-bottom:12px;">${s.price} ₽</div>
+                        <button type="button" class="btn-action" style="margin-top:auto; width:100%;" onclick="addToCart('${id}', '${s.name}', '${s.price}', '${s.img}')">В корзину</button>
+                    </div>
+                `;
+            }).reverse().join('');
+        }
+
+        /**
+         * ==========================================================================
+         * 10. STATISTICS & STANDINGS
+         * ==========================================================================
+         */
+        function renderStats() {
+            // Полевые игроки (Сортировка по Очкам: Голы + Пасы)
+            const statsArr = Object.entries(localData.stats || {}).sort((a,b) => {
+                let ptsA = (a[1].goals||0) + (a[1].assists||0);
+                let ptsB = (b[1].goals||0) + (b[1].assists||0);
+                return ptsB - ptsA;
+            });
+            const pCont = document.getElementById('playerStatsContainer');
+            if(pCont) {
+                pCont.innerHTML = `
+                    <table class="stats-tbl">
+                        <tr><th>#</th><th>Игрок</th><th>Г</th><th>П</th><th>О</th></tr>
+                        ${statsArr.map(([id,s],i) => `
+                            <tr>
+                                <td style="color:var(--primary);font-weight:900;">${i+1}</td>
+                                <td>${s.name}${isAdmin?` <span style="color:red;cursor:pointer;font-size:11px;" onclick="db.ref('stats/${id}').remove()">✖</span>`:''}</td>
+                                <td>${s.goals||0}</td>
+                                <td>${s.assists||0}</td>
+                                <td style="font-weight:bold; color:var(--primary);">${(s.goals||0)+(s.assists||0)}</td>
+                            </tr>
+                        `).join('')}
+                    </table>`;
+            }
+
+            // Вратари (Сортировка по ОБ%)
+            const goalieArr = Object.entries(localData.goalieStats || {}).sort((a,b)=>(b[1].svp||0)-(a[1].svp||0));
+            const gCont = document.getElementById('goalieStatsContainer');
+            if(gCont) {
+                gCont.innerHTML = `
+                    <table class="stats-tbl">
+                        <tr><th>#</th><th>Вратарь</th><th>КН</th><th>ОБ%</th></tr>
+                        ${goalieArr.map(([id,s],i) => `
+                            <tr>
+                                <td style="color:var(--primary);font-weight:900;">${i+1}</td>
+                                <td>${s.name}${isAdmin?` <span style="color:red;cursor:pointer;font-size:11px;" onclick="db.ref('goalieStats/${id}').remove()">✖</span>`:''}</td>
+                                <td>${s.gaa||0}</td>
+                                <td style="font-weight:bold; color:var(--primary);">${s.svp||0}%</td>
+                            </tr>
+                        `).join('')}
+                    </table>`;
+            }
+
+            // Турнирная таблица (Сортировка по очкам: В*3 + Н*1)
+            const standArr = Object.entries(localData.standings || {}).sort((a,b) => {
+                let ptsA = (a[1].wins||0)*3 + (a[1].draws||0);
+                let ptsB = (b[1].wins||0)*3 + (b[1].draws||0);
+                return ptsB - ptsA;
+            });
+            const stCont = document.getElementById('standingsContainer');
+            if(stCont) {
+                stCont.innerHTML = `
+                    <table class="stats-tbl">
+                        <tr><th>#</th><th>Команда</th><th>В</th><th>Н</th><th>П</th><th>О</th></tr>
+                        ${standArr.map(([id,t],i) => `
+                            <tr>
+                                <td style="color:var(--primary);font-weight:900;">${i+1}</td>
+                                <td>${t.name}${isAdmin?` <span style="color:red;cursor:pointer;font-size:11px;" onclick="db.ref('standings/${id}').remove()">✖</span>`:''}</td>
+                                <td>${t.wins||0}</td>
+                                <td>${t.draws||0}</td>
+                                <td>${t.losses||0}</td>
+                                <td style="font-weight:bold; color:var(--primary);">${(t.wins||0)*3+(t.draws||0)}</td>
+                            </tr>
+                        `).join('')}
+                    </table>`;
+            }
+        }
+
+        /**
+         * ==========================================================================
+         * 11. CALENDAR, SCHEDULE, FAME & GALLERY
+         * ==========================================================================
+         */
+        function renderCalendar() {
+            let matchesArr = Object.entries(localData.matches || {}).sort((a, b) => new Date(a[1].date || '1970-01-01') - new Date(b[1].date || '1970-01-01'));
+            const container = document.getElementById('calendarContainer');
+            if(!container) return;
+
+            container.innerHTML = matchesArr.map(([id, m]) => {
+                let d = m.date ? new Date(m.date).toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'}) : 'Дата не указана';
+                let delBtn = isAdmin ? `<button type="button" class="delete-btn" onclick="db.ref('matches/${id}').remove()">✖</button>` : '';
+                
+                if(m.type === 'BD') return `<div class="glass-card" style="border-color:rgba(255,215,0,0.5);">${delBtn}<div style="color:#ffd700;font-size:13px;font-weight:800;text-align:center;margin-bottom:10px;">🎂 День Рождения • ${d}</div><div style="text-align:center;font-size:20px;font-weight:900;color:var(--text-main);">🎉 ${m.opponent} 🎉</div></div>`;
+                if(m.type === 'event') return `<div class="glass-card" style="border-color:rgba(0,255,255,0.5);">${delBtn}<div style="color:#00ffff;font-size:13px;font-weight:800;text-align:center;margin-bottom:10px;">📌 Событие • ${d}</div><div style="text-align:center;font-size:18px;font-weight:800;color:var(--text-main);">${m.opponent}</div></div>`;
+                
+                let lo = m.logoO ? `<img src="${m.logoO}" style="width:100%;height:100%;object-fit:cover;">` : '🛡️';
+                let myLogo = localData.design?.logo || '1335.jpg';
+
+                return `
+                    <div class="glass-card">
+                        ${delBtn}
+                        <div style="font-size:13px;color:var(--primary);text-align:center;margin-bottom:18px;font-weight:800;text-transform:uppercase;">🏒 Матч • ${d}</div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;color:var(--text-main);">
+                            <div style="display:flex;flex-direction:column;align-items:center;width:30%;">
+                                <div style="width:60px;height:60px;background:rgba(0,0,0,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:10px;border:1px solid var(--glass-border);overflow:hidden;"><img src="${myLogo}" style="width:100%;height:100%;object-fit:cover;"></div>
+                                <div style="font-size:14px;font-weight:800;">Феникс</div>
+                            </div>
+                            <div style="background:rgba(0,0,0,0.5);border:1px solid var(--glass-border);border-radius:20px;padding:10px 24px;font-size:28px;font-weight:900;color:#fff;box-shadow:inset 0 0 10px rgba(0,0,0,0.8);">${m.scoreF||'-'} : ${m.scoreO||'-'}</div>
+                            <div style="display:flex;flex-direction:column;align-items:center;width:30%;">
+                                <div style="width:60px;height:60px;background:rgba(0,0,0,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:10px;border:1px solid var(--glass-border);overflow:hidden;">${lo}</div>
+                                <div style="font-size:14px;font-weight:800;">${m.opponent}</div>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('') || '<div style="text-align:center; color:var(--text-muted);">В календаре пока пусто</div>';
+        }
+
+        function renderFame() {
+            const container = document.getElementById('fameContainer');
+            if(!container) return;
+            const fameEntries = Object.entries(localData.fame || {});
+            
+            container.innerHTML = fameEntries.map(([id, f]) => `
+                <div class="glass-card" style="border: 1px solid #ffd700; background: linear-gradient(145deg, rgba(255,215,0,0.05), rgba(0,0,0,0.6));">
+                    ${isAdmin?`<button type="button" class="delete-btn" onclick="db.ref('fame/${id}').remove()">✖</button>`:''}
+                    <div style="font-size:30px; text-align:center; margin-bottom:15px; filter:drop-shadow(0 0 10px rgba(255,215,0,0.5));">🏆</div>
+                    ${f.img?`<img src="${f.img}" style="width:100%; border-radius:16px; margin-bottom:15px; max-height:250px; object-fit:cover; border:1px solid rgba(255,215,0,0.3);">`:''}
+                    <div style="font-size:22px; font-weight:900; color:#ffd700; text-align:center; margin-bottom:10px; letter-spacing:1px;">${f.title}</div>
+                    <div style="color:var(--text-main); text-align:center; line-height:1.5;">${f.desc}</div>
+                </div>
+            `).reverse().join('') || '<div style="text-align:center; color:var(--text-muted);">История пишется прямо сейчас...</div>';
+        }
+
+        function renderSchedule() { /* Заглушка, полная реализация в Части 4 вместе с админкой */ }
+        function renderPredictions() { /* Заглушка, полная реализация в Части 4 */ }
+        function renderGallery() { /* Заглушка, полная реализация в Части 4 */ }
+        function renderLiveMatch() { /* Заглушка, полная реализация в Части 4 */ }
+
+                /**
+         * ==========================================================================
+         * 12. REMAINING RENDER ENGINES (PART 4)
+         * ==========================================================================
+         */
+
+        /**
+         * Отрисовка расписания тренировок и игр
+         */
+        function renderSchedule() {
+            const container = document.getElementById('scheduleContainer');
+            if(!container) return;
+            
+            const schedArr = Object.entries(localData.schedule || {});
+            if(schedArr.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">Расписание пусто</div>';
+                return;
+            }
+
+            container.innerHTML = schedArr.map(([id, s]) => `
+                <div class="sched-card">
+                    <div style="background:var(--primary-grad); padding:12px 16px; border-radius:14px; font-weight:900; font-size:14px; color:#fff; text-align:center; min-width:60px; box-shadow:0 4px 10px var(--primary-glow);">
+                        ${s.day}
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-size:16px; font-weight:800; color:var(--text-main); margin-bottom:4px;">${s.time}</div>
+                        <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">📍 ${s.place}</div>
+                        <div style="font-size:11px; color:var(--primary); font-weight:800; text-transform:uppercase; letter-spacing:1px;">${s.type}</div>
+                    </div>
+                    ${isAdmin ? `<button type="button" class="delete-btn" style="display:flex; position:relative; top:0; right:0;" onclick="db.ref('schedule/${id}').remove()">✖</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        /**
+         * Отрисовка модуля Прогнозов (Интерактивная часть для фанатов)
+         */
+        function renderPredictions() {
+            const container = document.getElementById('predictionsContainer');
+            if(!container) return;
+
+            const predArr = Object.entries(localData.predictions || {}).sort((a,b) => new Date(b[1].date||0) - new Date(a[1].date||0));
+            if(predArr.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:var(--text-muted);">Активных прогнозов нет</div>';
+                return;
+            }
+
+            container.innerHTML = predArr.map(([id, p]) => {
+                let isClosed = p.closed; 
+                let myP = localStorage.getItem('phx_p_'+id);
+                let dStr = p.date ? new Date(p.date).toLocaleDateString('ru-RU', {day:'numeric', month:'long'}) : '';
+
+                let html = `
+                    <div class="pred-card">
+                        ${isAdmin ? `<button type="button" class="delete-btn" onclick="db.ref('predictions/${id}').remove()">✖</button>` : ''}
+                        <div style="font-weight:900; font-size:20px; margin-bottom:8px; color:var(--text-main); text-align:center;">🎯 ${p.match}</div>
+                        <div style="font-size:12px; color:var(--primary); margin-bottom:20px; font-weight:800; text-align:center; text-transform:uppercase;">${dStr}</div>
+                `;
+
+                if(isClosed) {
+                    html += `<div style="color:var(--primary); font-weight:900; font-size:18px; text-align:center; background:rgba(255,85,0,0.1); padding:15px; border-radius:16px; border:1px solid rgba(255,85,0,0.3);">Матч завершён. Итог: ${p.actualHome} : ${p.actualAway}</div>`;
+                } else if(myP) {
+                    html += `<div style="text-align:center; color:#4caf50; font-weight:800; background:rgba(76,175,80,0.1); padding:15px; border-radius:16px; border:1px solid rgba(76,175,80,0.3);">Ваш прогноз принят! ✅ Ожидайте результата.</div>`;
+                } else {
+                    html += `
+                        <div style="display:flex; justify-content:center; gap:15px; margin-bottom:20px; align-items:center;">
+                            <input type="number" id="ph-${id}" placeholder="0" style="width:70px; height:60px; text-align:center; background:rgba(0,0,0,0.6); color:var(--text-main); border:2px solid var(--glass-border); border-radius:16px; font-size:24px; font-weight:900; outline:none; transition:0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--glass-border)'"> 
+                            <span style="font-weight:900; color:var(--text-muted); font-size:24px;">:</span> 
+                            <input type="number" id="pa-${id}" placeholder="0" style="width:70px; height:60px; text-align:center; background:rgba(0,0,0,0.6); color:var(--text-main); border:2px solid var(--glass-border); border-radius:16px; font-size:24px; font-weight:900; outline:none; transition:0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--glass-border)'">
+                        </div>
+                        <button type="button" class="admin-btn-save" onclick="submitPrediction('${id}')">Отправить прогноз</button>
+                    `;
+                }
+
+                // Панель админа для закрытия прогноза
+                if(isAdmin && !isClosed) {
+                    html += `
+                        <div style="margin-top:25px; border-top:1px dashed rgba(128,128,128,0.3); padding-top:20px;">
+                            <div style="font-size:12px; color:var(--primary); margin-bottom:10px; font-weight:bold;">🛠 Админ: Указать реальный счет</div>
+                            <div style="display:flex; gap:10px; margin-bottom:12px;">
+                                <input type="number" id="ah-${id}" class="admin-input" placeholder="Итог Хоз.">
+                                <input type="number" id="aa-${id}" class="admin-input" placeholder="Итог Гост.">
+                            </div>
+                            <button type="button" class="btn-action" style="width:100%; margin:0; background:rgba(255,85,0,0.2); color:var(--primary);" onclick="closePrediction('${id}')">Закрыть прогноз</button>
+                        </div>
+                    `;
+                }
+
+                return html + `</div>`;
+            }).join('');
+        }
+
+        /**
+         * Отрисовка Фотогалереи (Группировка по альбомам)
+         */
+        function renderGallery() {
+            const container = document.getElementById('galleryContainer');
+            if(!container) return;
+
+            const albums = {}; 
+            Object.entries(localData.gallery || {}).forEach(([id, p]) => { 
+                let a = p.album || 'Общее фото'; 
+                if(!albums[a]) albums[a] = []; 
+                albums[a].push({id, ...p}); 
+            });
+
+            if(Object.keys(albums).length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:var(--text-muted);">Фотографий пока нет</div>';
+                return;
+            }
+
+            container.innerHTML = Object.entries(albums).map(([name, photos]) => `
+                <div class="glass-card">
+                    <div style="font-weight:900; font-size:18px; margin-bottom:15px; color:var(--primary);">📸 ${name}</div>
+                    <div class="gallery-grid">
+                        ${photos.map(p => `
+                            <div style="position:relative;">
+                                ${isAdmin ? `<button type="button" class="delete-btn" style="display:flex; width:24px; height:24px; font-size:10px; top:5px; right:5px;" onclick="db.ref('gallery/${p.id}').remove()">✖</button>` : ''}
+                                <img src="${p.img}" class="gallery-thumb" loading="lazy" onclick="window.open('${p.img}', '_blank')">
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * Отрисовка Live-Матча
+         */
+        function renderLiveMatch() {
+            const container = document.getElementById('liveMatchContainer');
+            if(!container) return;
+
+            const lm = localData.liveMatch;
+            if(!lm || !lm.active) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:16px; font-weight:600;">Сейчас нет активного матча</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="live-board">
+                    <div class="live-badge">LIVE</div>
+                    <div class="live-teams">
+                        <div style="font-weight:800; font-size:18px; width:30%;">${lm.homeTeam || 'Феникс'}</div>
+                        <div class="live-score-big">${lm.homeScore || 0} : ${lm.awayScore || 0}</div>
+                        <div style="font-weight:800; font-size:18px; width:30%;">${lm.awayTeam || 'Гости'}</div>
+                    </div>
+                    <div style="color:var(--primary); font-weight:900; font-size:14px; text-transform:uppercase; letter-spacing:2px; margin-top:10px;">${lm.period || 1} период</div>
+                </div>
             `;
-            document.getElementById('playerModal').classList.add('active');
-            
-            // Delay drawing slightly to ensure canvas is in DOM
-            setTimeout(() => {
-                drawRadarChart('radarChart', radarStats);
-            }, 50);
+
+            // Если есть виджет отметок (Check-in), обновляем цифры
+            const countArena = document.getElementById('count-arena');
+            const countOnline = document.getElementById('count-online');
+            if(lm.attendance) {
+                if(countArena) countArena.innerText = lm.attendance.arena || 0;
+                if(countOnline) countOnline.innerText = lm.attendance.online || 0;
+            }
         }
 
-        // ==========================================================================
-        // The rest of the original logic (Rendering, Storage uploads, Admin functions)
-        // remains perfectly intact and functions exactly as before. 
-        // ==========================================================================
-        
+        /**
+         * Отправка Прогноза пользователем
+         */
+        window.submitPrediction = function(id) {
+            let h = parseInt(document.getElementById('ph-'+id).value);
+            let a = parseInt(document.getElementById('pa-'+id).value);
+            
+            if(isNaN(h) || isNaN(a)) return alert('Пожалуйста, введите счет для обеих команд!');
+            
+            let userName = currentUser ? currentUser.email.split('@')[0] : (fanNames[Math.floor(Math.random()*fanNames.length)] + Math.floor(Math.random()*99));
+            
+            db.ref('predictions/'+id+'/entries').push({ name: userName, h: h, a: a })
+                .then(() => {
+                    localStorage.setItem('phx_p_'+id, '1'); 
+                    alert('Ваш прогноз успешно принят!'); 
+                    renderPredictions();
+                });
+        }
+
+
+        /**
+         * ==========================================================================
+         * 13. ADMIN ENGINE & DATA SAVING (PART 4)
+         * ==========================================================================
+         * Функции записи данных в Firebase, доступные только администратору.
+         */
+
+        /**
+         * Проверка пароля администратора (Режим Бога)
+         */
+        window.checkDevPassword = function() {
+            const passInput = document.getElementById('devPassInput').value;
+            if(passInput === "71633") { 
+                isAdmin = true; 
+                document.body.classList.add('is-admin'); 
+                document.getElementById('passwordModal').classList.remove('active');
+                document.getElementById('socialModal').classList.remove('active');
+                alert("Режим Бога активирован. Доступны функции редактирования и удаления."); 
+                // Перерисовываем UI, чтобы показать кнопки удаления
+                renderCoreUI();
+                renderExtendedUI();
+            } else { 
+                alert("Неверный пароль доступа!"); 
+            }
+        }
+
+        window.saveShopItem = async function() {
+            let name = document.getElementById('sName').value.trim();
+            let price = document.getElementById('sPriceNum').value;
+            if(!name || !price) return alert("Введите название и цену товара!");
+
+            let imgData = await processFilePromise('sImgFile');
+            
+            db.ref('shop').push({ 
+                name: name, 
+                price: price, 
+                img: imgData || "📦" // Фолбек иконка
+            }).then(() => {
+                alert('Товар успешно добавлен в магазин!');
+                document.getElementById('sName').value = '';
+                document.getElementById('sPriceNum').value = '';
+            });
+        }
+
+        window.saveMatch = async function() {
+            let imgData = await processFilePromise('mLogoOFile');
+            
+            db.ref('matches').push({ 
+                type: document.getElementById('mType').value, 
+                opponent: document.getElementById('mOpponent').value || "Соперник", 
+                date: document.getElementById('mDateRawC').value, 
+                scoreF: document.getElementById('mScoreF').value || "-", 
+                scoreO: document.getElementById('mScoreO').value || "-", 
+                logoO: imgData 
+            }).then(() => alert("Матч добавлен в календарь!"));
+        }
+
+        window.saveScheduleItem = function() { 
+            db.ref('schedule').push({ 
+                day: document.getElementById('schedDay').value, 
+                time: document.getElementById('schedTime').value || "12:00", 
+                place: document.getElementById('schedPlace').value || "Арена", 
+                type: document.getElementById('schedType').value 
+            }).then(() => alert('Событие добавлено в расписание!')); 
+        }
+
+        window.createPrediction = function() { 
+            let match = document.getElementById('predMatch').value.trim();
+            let date = document.getElementById('predDate').value;
+            if(!match) return alert("Введите название матча!");
+
+            db.ref('predictions').push({ 
+                match: match, 
+                date: date, 
+                closed: false, 
+                entries: {} 
+            }).then(() => alert('Голосование за прогноз создано!')); 
+        }
+
+        window.closePrediction = function(id) {
+            let ah = parseInt(document.getElementById('ah-'+id).value);
+            let aa = parseInt(document.getElementById('aa-'+id).value); 
+            if(isNaN(ah) || isNaN(aa)) return alert("Введите реальный счет завершенного матча!");
+            
+            db.ref('predictions/'+id).update({ 
+                closed: true, 
+                actualHome: ah, 
+                actualAway: aa 
+            }).then(() => alert("Прогноз закрыт! Итоги подведены."));
+        }
+
+        window.saveGalleryPhoto = async function() { 
+            let album = document.getElementById('galAlbum').value.trim() || 'Фото с матча';
+            let img = await processFilePromise('galPhotoFile'); 
+            if(!img) return alert("Выберите фотографию!"); 
+            
+            db.ref('gallery').push({ 
+                album: album, 
+                img: img 
+            }).then(() => alert('Фотография успешно загружена в галерею!')); 
+        }
+
+        /**
+         * ==========================================================================
+         * 14. LIVE MATCH CONTROLS (ADMIN ONLY)
+         * ==========================================================================
+         */
+        window.startLiveMatch = function() { 
+            let home = document.getElementById('liveHome').value || 'Феникс';
+            let away = document.getElementById('liveAway').value || 'Гости';
+            
+            db.ref('liveMatch').set({ 
+                active: true, 
+                homeTeam: home, 
+                awayTeam: away, 
+                homeScore: 0, 
+                awayScore: 0, 
+                period: 1, 
+                events: {}, 
+                attendance: { arena: 0, online: 0 } 
+            }).then(() => alert("Live-трансляция начата!")); 
+        }
+
+        window.endLiveMatch = function() { 
+            let lm = localData.liveMatch; 
+            if(!lm || !lm.active) return alert("Матч не запущен.");
+            
+            if(confirm('Вы уверены, что хотите завершить Live-матч? Данные табло сбросятся.')) { 
+                if(lm.homeScore > lm.awayScore && typeof fireConfetti === 'function') {
+                    fireConfetti(); // Победа Феникса!
+                }
+                db.ref('liveMatch').set(null).then(() => alert("Матч завершен.")); 
+            } 
+        }
+
+        window.liveScoreChange = function(team, delta) { 
+            let key = team === 'home' ? 'homeScore' : 'awayScore'; 
+            if(localData.liveMatch && localData.liveMatch.active) {
+                let currentScore = localData.liveMatch[key] || 0;
+                db.ref('liveMatch/' + key).set(Math.max(0, currentScore + delta)); 
+            } else {
+                alert("Сначала начните матч!");
+            }
+        }
+
+        window.setLivePeriod = function() { 
+            let period = document.getElementById('livePeriod').value;
+            if(localData.liveMatch && localData.liveMatch.active) {
+                db.ref('liveMatch/period').set(period); 
+            }
+        }
+
     </script>
+
+    </script>
+
 </body>
 </html>
